@@ -54,12 +54,16 @@ export default function SettingsPanel({
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && open) { editing ? setEditing(null) : onClose() } }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (editing) setEditing(null)
+        else if (open) onClose()
+      }
+    }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [open, onClose, editing])
 
-  // 关闭面板时清除编辑状态
   useEffect(() => { if (!open) setEditing(null) }, [open])
 
   const saveEditing = () => {
@@ -144,114 +148,90 @@ export default function SettingsPanel({
     })
   }
 
-  // 编辑表单渲染
-  const renderEditForm = () => {
+  const renderEditModal = () => {
     if (!editing) return null
 
-    if (editing.type === 'confirmDelete') {
-      return (
-        <div className={s.editModal}>
-          <div className={s.editTitle}>{editing.message}</div>
-          <div className={s.editActions}>
-            <button className={`${s.saveBtn} ${s.dangerSaveBtn}`} onClick={saveEditing}>确定删除</button>
-            <button className={s.cancelBtn} onClick={() => setEditing(null)}>取消</button>
-          </div>
-        </div>
-      )
-    }
+    let title = ''
+    let content: React.ReactNode = null
+    let isDanger = false
 
-    if (editing.type === 'link') {
+    if (editing.type === 'confirmDelete') {
+      title = '确认操作'
+      isDanger = true
+      content = <p className={s.confirmMsg}>{editing.message}</p>
+    } else if (editing.type === 'link') {
       const { link } = editing
       const update = (patch: Partial<NavLink>) => setEditing({ ...editing, link: { ...link, ...patch } })
-      return (
-        <div className={s.editModal}>
-          <div className={s.editTitle}>{editing.linkIdx === -1 ? '添加链接' : '编辑链接'}</div>
-          <div className={s.formGrid}>
-            <input className={s.formInput} placeholder="名称" value={link.name} onChange={(e) => update({ name: e.target.value })} autoFocus />
-            <input className={s.formInput} placeholder="网址 (https://...)" value={link.url} onChange={(e) => update({ url: e.target.value })} />
-            <div className={s.formRow}>
-              <input className={s.formInput} placeholder="Emoji" value={link.emoji} onChange={(e) => update({ emoji: e.target.value })} style={{ flex: '0 0 80px' }} />
-              <input className={s.formInput} placeholder="描述" value={link.desc} onChange={(e) => update({ desc: e.target.value })} />
-            </div>
-            <input className={s.formInput} placeholder="FA 图标类名 (可选，如 fab fa-github)" value={link.faIcon || ''} onChange={(e) => update({ faIcon: e.target.value })} />
+      title = editing.linkIdx === -1 ? '添加链接' : '编辑链接'
+      content = (
+        <div className={s.formGrid}>
+          <input className={s.formInput} placeholder="名称" value={link.name} onChange={(e) => update({ name: e.target.value })} autoFocus />
+          <input className={s.formInput} placeholder="网址 (https://...)" value={link.url} onChange={(e) => update({ url: e.target.value })} />
+          <div className={s.formRow}>
+            <input className={s.formInput} placeholder="Emoji" value={link.emoji} onChange={(e) => update({ emoji: e.target.value })} style={{ flex: '0 0 80px' }} />
+            <input className={s.formInput} placeholder="描述" value={link.desc} onChange={(e) => update({ desc: e.target.value })} />
           </div>
-          <div className={s.editActions}>
-            <button className={s.saveBtn} onClick={saveEditing}>保存</button>
-            <button className={s.cancelBtn} onClick={() => setEditing(null)}>取消</button>
-          </div>
+          <input className={s.formInput} placeholder="FA 图标类名 (可选，如 fab fa-github)" value={link.faIcon || ''} onChange={(e) => update({ faIcon: e.target.value })} />
         </div>
       )
-    }
-
-    if (editing.type === 'dock') {
+    } else if (editing.type === 'dock') {
       const { item } = editing
       const update = (patch: Partial<DockItem>) => setEditing({ ...editing, item: { ...item, ...patch } })
-      return (
-        <div className={s.editModal}>
-          <div className={s.editTitle}>{editing.idx === -1 ? '添加 Dock 项' : '编辑 Dock 项'}</div>
-          <div className={s.formGrid}>
-            <div className={s.formRow}>
-              <input className={s.formInput} placeholder="Emoji" value={item.emoji} onChange={(e) => update({ emoji: e.target.value })} style={{ flex: '0 0 80px' }} autoFocus />
-              <input className={s.formInput} placeholder="名称" value={item.name} onChange={(e) => update({ name: e.target.value })} />
-            </div>
-            <input className={s.formInput} placeholder="网址" value={item.url || ''} onChange={(e) => update({ url: e.target.value })} />
+      title = editing.idx === -1 ? '添加 Dock 项' : '编辑 Dock 项'
+      content = (
+        <div className={s.formGrid}>
+          <div className={s.formRow}>
+            <input className={s.formInput} placeholder="Emoji" value={item.emoji} onChange={(e) => update({ emoji: e.target.value })} style={{ flex: '0 0 80px' }} autoFocus />
+            <input className={s.formInput} placeholder="名称" value={item.name} onChange={(e) => update({ name: e.target.value })} />
           </div>
-          <div className={s.editActions}>
-            <button className={s.saveBtn} onClick={saveEditing}>保存</button>
-            <button className={s.cancelBtn} onClick={() => setEditing(null)}>取消</button>
-          </div>
+          <input className={s.formInput} placeholder="网址" value={item.url || ''} onChange={(e) => update({ url: e.target.value })} />
         </div>
       )
-    }
-
-    if (editing.type === 'greeting') {
-      return (
-        <div className={s.editModal}>
-          <div className={s.editTitle}>编辑问候语</div>
-          <div className={s.formGrid}>
-            <input className={s.formInput} placeholder="称呼" value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} autoFocus />
-            <input className={s.formInput} placeholder="副标题" value={editing.subtitle} onChange={(e) => setEditing({ ...editing, subtitle: e.target.value })} />
-          </div>
-          <div className={s.editActions}>
-            <button className={s.saveBtn} onClick={saveEditing}>保存</button>
-            <button className={s.cancelBtn} onClick={() => setEditing(null)}>取消</button>
-          </div>
+    } else if (editing.type === 'greeting') {
+      title = '编辑问候语'
+      content = (
+        <div className={s.formGrid}>
+          <input className={s.formInput} placeholder="称呼" value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} autoFocus />
+          <input className={s.formInput} placeholder="副标题" value={editing.subtitle} onChange={(e) => setEditing({ ...editing, subtitle: e.target.value })} />
         </div>
       )
-    }
-
-    if (editing.type === 'menuBar') {
-      return (
-        <div className={s.editModal}>
-          <div className={s.editTitle}>编辑菜单栏</div>
+    } else if (editing.type === 'menuBar') {
+      title = '编辑菜单栏'
+      content = (
+        <>
           <div className={s.formGrid}>
             <input className={s.formInput} placeholder="菜单项（逗号分隔）" value={editing.value} onChange={(e) => setEditing({ ...editing, value: e.target.value })} autoFocus />
           </div>
           <p className={s.formHint}>多个菜单项用逗号分隔，如：访达, 文件, 编辑</p>
-          <div className={s.editActions}>
-            <button className={s.saveBtn} onClick={saveEditing}>保存</button>
-            <button className={s.cancelBtn} onClick={() => setEditing(null)}>取消</button>
-          </div>
+        </>
+      )
+    } else if (editing.type === 'newCategory' || editing.type === 'renameCategory') {
+      title = editing.type === 'newCategory' ? '新建分类' : '重命名分类'
+      content = (
+        <div className={s.formGrid}>
+          <input className={s.formInput} placeholder="分类名称" value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} autoFocus />
         </div>
       )
     }
 
-    if (editing.type === 'newCategory' || editing.type === 'renameCategory') {
-      return (
+    return (
+      <>
+        <div className={s.editOverlay} onClick={() => setEditing(null)} />
         <div className={s.editModal}>
-          <div className={s.editTitle}>{editing.type === 'newCategory' ? '新建分类' : '重命名分类'}</div>
-          <div className={s.formGrid}>
-            <input className={s.formInput} placeholder="分类名称" value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} autoFocus />
+          <div className={s.editHeader}>
+            <span className={s.editTitle}>{title}</span>
+            <button className={s.editCloseBtn} onClick={() => setEditing(null)}>&times;</button>
           </div>
+          {content}
           <div className={s.editActions}>
-            <button className={s.saveBtn} onClick={saveEditing}>保存</button>
             <button className={s.cancelBtn} onClick={() => setEditing(null)}>取消</button>
+            <button className={`${s.saveBtn} ${isDanger ? s.dangerSaveBtn : ''}`} onClick={saveEditing}>
+              {isDanger ? '确定删除' : '保存'}
+            </button>
           </div>
         </div>
-      )
-    }
-
-    return null
+      </>
+    )
   }
 
   return (
@@ -263,7 +243,6 @@ export default function SettingsPanel({
           <button className={s.closeBtn} onClick={onClose}>&times;</button>
         </div>
 
-        {/* Tab 切换 */}
         <div className={s.tabs}>
           {([['style', '外观'], ['content', '内容'], ['data', '数据']] as [Tab, string][]).map(([key, label]) => (
             <button key={key} className={`${s.tab} ${tab === key ? s.tabActive : ''}`} onClick={() => { setTab(key); setEditing(null) }}>
@@ -272,7 +251,6 @@ export default function SettingsPanel({
           ))}
         </div>
 
-        {/* === 外观 Tab === */}
         {tab === 'style' && (
           <>
             <div className={s.section}>
@@ -300,7 +278,6 @@ export default function SettingsPanel({
           </>
         )}
 
-        {/* === 内容 Tab === */}
         {tab === 'content' && (
           <>
             <div className={s.section}>
@@ -363,7 +340,6 @@ export default function SettingsPanel({
           </>
         )}
 
-        {/* === 数据 Tab === */}
         {tab === 'data' && (
           <div className={s.section}>
             <div className={s.label}>配置管理</div>
@@ -376,10 +352,9 @@ export default function SettingsPanel({
             <p className={s.dataTip}>导出后可手动编辑 YAML 文件，再导入恢复配置</p>
           </div>
         )}
-
-        {/* 内联编辑表单 */}
-        {renderEditForm()}
       </div>
+
+      {renderEditModal()}
     </>
   )
 }
