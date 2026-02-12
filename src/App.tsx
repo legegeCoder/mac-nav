@@ -127,6 +127,26 @@ export default function App() {
     setCtx({ x: e.clientX, y: e.clientY, items })
   }, [updateConfig])
 
+  // Reorder cards across/within categories
+  const handleReorderCard = useCallback((fromCat: number, fromIdx: number, toCat: number, toIdx: number) => {
+    updateConfig((prev) => {
+      const cats = prev.categories.map((c) => ({ ...c, links: [...c.links] }))
+      const [moved] = cats[fromCat].links.splice(fromIdx, 1)
+      cats[toCat].links.splice(toIdx, 0, moved)
+      return { ...prev, categories: cats }
+    })
+  }, [updateConfig])
+
+  // Reorder dock items
+  const handleReorderDock = useCallback((fromIdx: number, toIdx: number) => {
+    updateConfig((prev) => {
+      const items = [...prev.dock.items]
+      const [moved] = items.splice(fromIdx, 1)
+      items.splice(toIdx, 0, moved)
+      return { ...prev, dock: { ...prev.dock, items } }
+    })
+  }, [updateConfig])
+
   return (
     <>
       <BgDecoration />
@@ -139,14 +159,16 @@ export default function App() {
           subtitle={config.greeting.subtitle}
         />
         <SearchBar isLaunchpad={cardStyle === 'launchpad'} />
-        {config.categories.map((cat) => (
+        {config.categories.map((cat, catIdx) => (
           <CategorySection
             key={cat.title}
             category={cat}
+            catIdx={catIdx}
             cardStyle={cardStyle}
             iconStyle={iconStyle}
             linkTarget={linkTarget}
             onCardContextMenu={handleCardContext}
+            onReorderCard={handleReorderCard}
           />
         ))}
       </main>
@@ -158,6 +180,7 @@ export default function App() {
         onSettingsClick={() => setSettingsOpen(true)}
         onDropLink={handleDropLink}
         onItemContextMenu={handleDockContext}
+        onReorderDock={handleReorderDock}
       />
 
       <SettingsPanel

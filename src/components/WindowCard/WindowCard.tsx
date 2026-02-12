@@ -4,14 +4,17 @@ import s from './WindowCard.module.css'
 
 interface Props {
   link: NavLink
+  catIdx: number
+  linkIdx: number
   cardStyle: CardStyle
   iconStyle: IconStyle
   linkTarget: 'new' | 'self'
   index: number
   onContextMenu?: (e: React.MouseEvent, link: NavLink) => void
+  onReorder?: (fromCat: number, fromIdx: number, toCat: number, toIdx: number) => void
 }
 
-export default function WindowCard({ link, cardStyle, iconStyle, linkTarget, index, onContextMenu }: Props) {
+export default function WindowCard({ link, catIdx, linkIdx, cardStyle, iconStyle, linkTarget, index, onContextMenu, onReorder }: Props) {
   const cls = [
     s.card,
     cardStyle !== 'default' ? s[`style_${cardStyle}`] : '',
@@ -36,7 +39,38 @@ export default function WindowCard({ link, cardStyle, iconStyle, linkTarget, ind
 
   const onDragStart = (e: React.DragEvent) => {
     e.dataTransfer.setData('application/nav-link', JSON.stringify(link))
-    e.dataTransfer.effectAllowed = 'copy'
+    e.dataTransfer.setData('application/card-reorder', JSON.stringify({ catIdx, linkIdx }))
+    e.dataTransfer.effectAllowed = 'copyMove'
+    ;(e.target as HTMLElement).style.opacity = '0.4'
+  }
+
+  const onDragEnd = (e: React.DragEvent) => {
+    ;(e.target as HTMLElement).style.opacity = ''
+  }
+
+  const onDragOver = (e: React.DragEvent) => {
+    if (e.dataTransfer.types.includes('application/card-reorder')) {
+      e.preventDefault()
+      e.dataTransfer.dropEffect = 'move'
+      ;(e.currentTarget as HTMLElement).classList.add(s.dropTarget)
+    }
+  }
+
+  const onDragLeave = (e: React.DragEvent) => {
+    ;(e.currentTarget as HTMLElement).classList.remove(s.dropTarget)
+  }
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    ;(e.currentTarget as HTMLElement).classList.remove(s.dropTarget)
+    const raw = e.dataTransfer.getData('application/card-reorder')
+    if (!raw || !onReorder) return
+    try {
+      const from = JSON.parse(raw) as { catIdx: number; linkIdx: number }
+      if (from.catIdx === catIdx && from.linkIdx === linkIdx) return
+      onReorder(from.catIdx, from.linkIdx, catIdx, linkIdx)
+    } catch { /* ignore */ }
   }
 
   const handleContextMenu = (e: React.MouseEvent) => {
@@ -56,6 +90,10 @@ export default function WindowCard({ link, cardStyle, iconStyle, linkTarget, ind
       style={{ ...launchpadVars, animationDelay: `${0.1 + index * 0.1}s` }}
       draggable
       onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
       onContextMenu={handleContextMenu}
     >
       <div className={s.header}>

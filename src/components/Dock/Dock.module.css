@@ -111,3 +111,10 @@
   transform: scale(1.04);
   transition: all 0.2s ease;
 }
+
+/* Dock item drop target for reorder */
+.itemDropTarget .icon {
+  opacity: 0.5;
+  transform: translateY(-5px) scale(1.1);
+  transition: all 0.2s ease;
+}

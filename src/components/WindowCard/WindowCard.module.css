@@ -172,3 +172,9 @@
   }
   .style_launchpad .name { font-size: 11px; }
 }
+
+/* Drop target for reorder */
+.dropTarget {
+  opacity: 0.5;
+  transition: all 0.2s ease;
+}
