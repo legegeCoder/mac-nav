@@ -26,6 +26,7 @@ type EditMode =
   | { type: 'dock'; section: 'items' | 'utilities'; idx: number; item: DockItem }
   | { type: 'greeting'; name: string; subtitle: string }
   | { type: 'menuBar'; value: string }
+  | { type: 'favicon'; value: string }
   | { type: 'newCategory'; title: string }
   | { type: 'renameCategory'; idx: number; title: string }
   | { type: 'confirmDelete'; action: () => void; message: string }
@@ -123,6 +124,9 @@ export default function SettingsPanel({
         break
       case 'menuBar':
         updateConfig((prev) => ({ ...prev, menuBar: { items: editing.value.split(',').map(s => s.trim()).filter(Boolean) } }))
+        break
+      case 'favicon':
+        updateConfig((prev) => ({ ...prev, favicon: editing.value || undefined }))
         break
       case 'newCategory':
         if (!editing.title) return
@@ -227,6 +231,17 @@ export default function SettingsPanel({
           <p className={s.formHint}>多个菜单项用逗号分隔，如：访达, 文件, 编辑</p>
         </>
       )
+    } else if (editing.type === 'favicon') {
+      title = '网站图标'
+      content = (
+        <>
+          <div className={s.formGrid}>
+            <input className={s.formInput} placeholder="图标 URL (https://...)" value={editing.value} onChange={(e) => setEditing({ ...editing, value: e.target.value })} autoFocus />
+          </div>
+          <p className={s.formHint}>填写图标图片地址，留空则使用浏览器默认图标</p>
+          {editing.value && <img src={editing.value} alt="favicon preview" style={{ width: 32, height: 32, marginTop: 8, objectFit: 'contain' }} />}
+        </>
+      )
     } else if (editing.type === 'newCategory' || editing.type === 'renameCategory') {
       title = editing.type === 'newCategory' ? '新建分类' : '重命名分类'
       content = (
@@ -323,6 +338,9 @@ export default function SettingsPanel({
                 </button>
                 <button className={s.infoBtn} onClick={() => setEditing({ type: 'menuBar', value: config.menuBar.items.join(', ') })}>
                   菜单栏
+                </button>
+                <button className={s.infoBtn} onClick={() => setEditing({ type: 'favicon', value: config.favicon || '' })}>
+                  网站图标
                 </button>
               </div>
             </div>

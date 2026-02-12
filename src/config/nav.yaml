@@ -2,6 +2,8 @@ greeting:
   name: "乐鸽鸽"
   subtitle: "你想去哪里？"
 
+favicon: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f30f.png"
+
 menuBar:
   items:
     - 访达

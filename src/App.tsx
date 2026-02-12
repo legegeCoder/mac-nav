@@ -28,6 +28,18 @@ export default function App() {
   const [ctx, setCtx] = useState<CtxState | null>(null)
 
   const linkTarget = config.settings?.linkTarget || 'new'
+
+  // Dynamic favicon
+  useEffect(() => {
+    if (!config.favicon) return
+    let link = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
+    if (!link) {
+      link = document.createElement('link')
+      link.rel = 'icon'
+      document.head.appendChild(link)
+    }
+    link.href = config.favicon
+  }, [config.favicon])
   const setLinkTarget = useCallback((v: 'new' | 'self') => {
     updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, linkTarget: v } }))
   }, [updateConfig])
