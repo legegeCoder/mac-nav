@@ -12,6 +12,9 @@ menuBar:
     - 窗口
     - 帮助
 
+settings:
+  linkTarget: "new"
+
 categories:
   - title: "✨ 常用工具"
     links:

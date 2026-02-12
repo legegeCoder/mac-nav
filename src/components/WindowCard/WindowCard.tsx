@@ -6,10 +6,12 @@ interface Props {
   link: NavLink
   cardStyle: CardStyle
   iconStyle: IconStyle
+  linkTarget: 'new' | 'self'
   index: number
+  onContextMenu?: (e: React.MouseEvent, link: NavLink) => void
 }
 
-export default function WindowCard({ link, cardStyle, iconStyle, index }: Props) {
+export default function WindowCard({ link, cardStyle, iconStyle, linkTarget, index, onContextMenu }: Props) {
   const cls = [
     s.card,
     cardStyle !== 'default' ? s[`style_${cardStyle}`] : '',
@@ -32,11 +34,29 @@ export default function WindowCard({ link, cardStyle, iconStyle, index }: Props)
     return <>{link.emoji}</>
   }
 
+  const onDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData('application/nav-link', JSON.stringify(link))
+    e.dataTransfer.effectAllowed = 'copy'
+  }
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    if (onContextMenu) {
+      e.preventDefault()
+      e.stopPropagation()
+      onContextMenu(e, link)
+    }
+  }
+
   return (
     <a
       href={link.url}
+      target={linkTarget === 'new' ? '_blank' : '_self'}
+      rel={linkTarget === 'new' ? 'noopener noreferrer' : undefined}
       className={cls}
       style={{ ...launchpadVars, animationDelay: `${0.1 + index * 0.1}s` }}
+      draggable
+      onDragStart={onDragStart}
+      onContextMenu={handleContextMenu}
     >
       <div className={s.header}>
         <div className={s.controls}>

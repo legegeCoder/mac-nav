@@ -22,6 +22,7 @@ export interface DockItem {
 export interface NavConfig {
   greeting: { name: string; subtitle: string }
   menuBar: { items: string[] }
+  settings?: { linkTarget?: 'new' | 'self' }
   categories: Category[]
   dock: { items: DockItem[]; utilities: DockItem[] }
 }

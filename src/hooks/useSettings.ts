@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 
 export type CardStyle = 'default' | 'minimal' | 'glass' | 'neumorphic' | 'launchpad'
 export type IconStyle = 'emoji' | 'outlined' | 'filled'
+export type LinkTarget = 'new' | 'self'
 
 export function useSettings() {
   const [cardStyle, setCardStyle] = useState<CardStyle>(

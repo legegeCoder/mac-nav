@@ -8,8 +8,10 @@ interface Props {
   onClose: () => void
   cardStyle: CardStyle
   iconStyle: IconStyle
+  linkTarget: 'new' | 'self'
   setCardStyle: (v: CardStyle) => void
   setIconStyle: (v: IconStyle) => void
+  setLinkTarget: (v: 'new' | 'self') => void
   config: NavConfig
   updateConfig: (updater: (prev: NavConfig) => NavConfig) => void
   resetConfig: () => void
@@ -46,7 +48,7 @@ const emptyLink: NavLink = { name: '', url: '', emoji: '🔗', desc: '', faIcon:
 const emptyDock: DockItem = { name: '', url: '', emoji: '🔗' }
 
 export default function SettingsPanel({
-  open, onClose, cardStyle, iconStyle, setCardStyle, setIconStyle,
+  open, onClose, cardStyle, iconStyle, linkTarget, setCardStyle, setIconStyle, setLinkTarget,
   config, updateConfig, resetConfig, exportYaml, importYaml,
 }: Props) {
   const [tab, setTab] = useState<Tab>('style')
@@ -65,6 +67,26 @@ export default function SettingsPanel({
   }, [open, onClose, editing])
 
   useEffect(() => { if (!open) setEditing(null) }, [open])
+
+  // Listen for external edit requests from context menu
+  useEffect(() => {
+    const onEditLink = (e: Event) => {
+      const { catIdx, linkIdx, link } = (e as CustomEvent).detail
+      setTab('content')
+      setEditing({ type: 'link', catIdx, linkIdx, link })
+    }
+    const onEditDock = (e: Event) => {
+      const { section, idx, item } = (e as CustomEvent).detail
+      setTab('content')
+      setEditing({ type: 'dock', section, idx, item })
+    }
+    window.addEventListener('edit-link', onEditLink)
+    window.addEventListener('edit-dock', onEditDock)
+    return () => {
+      window.removeEventListener('edit-link', onEditLink)
+      window.removeEventListener('edit-dock', onEditDock)
+    }
+  }, [])
 
   const saveEditing = () => {
     if (!editing) return
@@ -273,6 +295,19 @@ export default function SettingsPanel({
                     <div className={s.optionName}>{opt.label}</div>
                   </div>
                 ))}
+              </div>
+            </div>
+            <div className={s.section}>
+              <div className={s.label}>链接打开方式</div>
+              <div className={`${s.options} ${s.options2}`}>
+                <div className={`${s.option} ${linkTarget === 'new' ? s.optionActive : ''}`} onClick={() => setLinkTarget('new')}>
+                  <div className={s.optionPreview}>🔗</div>
+                  <div className={s.optionName}>新标签页</div>
+                </div>
+                <div className={`${s.option} ${linkTarget === 'self' ? s.optionActive : ''}`} onClick={() => setLinkTarget('self')}>
+                  <div className={s.optionPreview}>📄</div>
+                  <div className={s.optionName}>当前页面</div>
+                </div>
               </div>
             </div>
           </>
