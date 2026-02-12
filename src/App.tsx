@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { useNavConfig } from './hooks/useNavConfig'
 import { useSettings } from './hooks/useSettings'
 import { useClock } from './hooks/useClock'
+import { useAuth } from './hooks/useAuth'
 import BgDecoration from './components/BgDecoration/BgDecoration'
 import MenuBar from './components/MenuBar/MenuBar'
 import Welcome from './components/Welcome/Welcome'
@@ -10,6 +11,7 @@ import CategorySection from './components/CategorySection/CategorySection'
 import Dock from './components/Dock/Dock'
 import SettingsPanel from './components/SettingsPanel/SettingsPanel'
 import ContextMenu from './components/ContextMenu/ContextMenu'
+import LoginPage from './components/LoginPage/LoginPage'
 import type { MenuItem } from './components/ContextMenu/ContextMenu'
 import type { NavLink, DockItem } from './types/nav'
 import './styles/global.css'
@@ -24,10 +26,23 @@ export default function App() {
   const { config, updateConfig, resetConfig, exportYaml, importYaml } = useNavConfig()
   const { cardStyle, setCardStyle, iconStyle, setIconStyle } = useSettings()
   const { greeting } = useClock()
+  const { isLoggedIn, login, logout } = useAuth()
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [ctx, setCtx] = useState<CtxState | null>(null)
 
-  const linkTarget = config.settings?.linkTarget || 'new'
+  const linkTarget = config?.settings?.linkTarget || 'new'
+
+  // Dynamic favicon
+  useEffect(() => {
+    if (!config?.favicon) return
+    let link = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
+    if (!link) {
+      link = document.createElement('link')
+      link.rel = 'icon'
+      document.head.appendChild(link)
+    }
+    link.href = config.favicon
+  }, [config?.favicon])
   const setLinkTarget = useCallback((v: 'new' | 'self') => {
     updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, linkTarget: v } }))
   }, [updateConfig])
@@ -51,6 +66,7 @@ export default function App() {
 
   // Find which category/index a link belongs to
   const findLink = useCallback((link: NavLink) => {
+    if (!config) return null
     for (let ci = 0; ci < config.categories.length; ci++) {
       const li = config.categories[ci].links.findIndex((l) => l.url === link.url && l.name === link.name)
       if (li !== -1) return { catIdx: ci, linkIdx: li }
@@ -147,10 +163,23 @@ export default function App() {
     })
   }, [updateConfig])
 
+  if (!config) {
+    return <BgDecoration />
+  }
+
+  if (!isLoggedIn) {
+    return (
+      <>
+        <BgDecoration />
+        <LoginPage onLogin={login} avatar={config.avatar} />
+      </>
+    )
+  }
+
   return (
     <>
       <BgDecoration />
-      <MenuBar items={config.menuBar.items} />
+      <MenuBar items={config.menuBar.items} icon={config.favicon} onLogout={logout} />
 
       <main style={{ position: 'relative', zIndex: 1, padding: '80px 40px 140px', maxWidth: 1400, margin: '0 auto' }}>
         <Welcome

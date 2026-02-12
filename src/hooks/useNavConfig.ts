@@ -1,37 +1,67 @@
 import { useState, useEffect, useCallback } from 'react'
 import yaml from 'js-yaml'
-import defaultConfig from '../config/nav.yaml'
+import { getAuthToken, clearAuthToken } from './useAuth'
 import type { NavConfig } from '../types/nav'
 
-const STORAGE_KEY = 'navConfig'
-
-function loadConfig(): NavConfig {
-  const saved = localStorage.getItem(STORAGE_KEY)
-  if (saved) {
-    try {
-      return JSON.parse(saved) as NavConfig
-    } catch { /* fall through */ }
+async function fetchRemoteConfig(): Promise<NavConfig | null> {
+  try {
+    const res = await fetch('/api/config')
+    if (!res.ok) return null
+    const data = await res.json()
+    if (data?.categories && data?.dock) return data as NavConfig
+    return null
+  } catch {
+    return null
   }
-  return defaultConfig as unknown as NavConfig
+}
+
+async function saveRemoteConfig(config: NavConfig): Promise<void> {
+  try {
+    const token = getAuthToken()
+    const res = await fetch('/api/config', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(config),
+    })
+    if (res.status === 401) {
+      clearAuthToken()
+      window.location.reload()
+    }
+  } catch { /* ignore save errors */ }
 }
 
 export function useNavConfig() {
-  const [config, setConfig] = useState<NavConfig>(loadConfig)
+  const [config, setConfig] = useState<NavConfig | null>(null)
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(config))
-  }, [config])
+    let cancelled = false
+    fetchRemoteConfig().then((remote) => {
+      if (cancelled || !remote) return
+      setConfig(remote)
+    })
+    return () => { cancelled = true }
+  }, [])
 
   const updateConfig = useCallback((updater: (prev: NavConfig) => NavConfig) => {
-    setConfig((prev) => updater(prev))
+    setConfig((prev) => {
+      if (!prev) return prev
+      const next = updater(prev)
+      saveRemoteConfig(next)
+      return next
+    })
   }, [])
 
   const resetConfig = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY)
-    setConfig(defaultConfig as unknown as NavConfig)
+    fetchRemoteConfig().then((remote) => {
+      if (remote) setConfig(remote)
+    })
   }, [])
 
   const exportYaml = useCallback(() => {
+    if (!config) return
     const text = yaml.dump(config, { lineWidth: -1, noRefs: true })
     const blob = new Blob([text], { type: 'text/yaml' })
     const url = URL.createObjectURL(blob)
@@ -49,6 +79,7 @@ export function useNavConfig() {
         const parsed = yaml.load(reader.result as string) as NavConfig
         if (parsed?.categories && parsed?.dock) {
           setConfig(parsed)
+          saveRemoteConfig(parsed)
         }
       } catch (e) {
         console.error('YAML 解析失败', e)

@@ -1,0 +1,11 @@
+services:
+  nav:
+    image: legege1997/nav:latest
+    container_name: nav
+    ports:
+      - "8090:80"
+    volumes:
+      - ./user-data:/app/user-data
+    environment:
+      - NAV_PASSWORD=admin
+    restart: unless-stopped
