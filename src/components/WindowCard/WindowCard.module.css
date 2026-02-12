@@ -1,0 +1,174 @@
+.card {
+  background: var(--window-bg);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.5) inset;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: scaleIn 0.6s ease-out backwards;
+  cursor: pointer;
+  text-decoration: none;
+  display: block;
+}
+.card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.6) inset;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0.3));
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.controls { display: flex; gap: 8px; }
+.btn { width: 12px; height: 12px; border-radius: 50%; transition: all 0.2s; }
+.close { background: var(--window-red); }
+.minimize { background: var(--window-yellow); }
+.maximize { background: var(--window-green); }
+.card:hover .close { background: #ff4136; }
+.card:hover .minimize { background: #f9a825; }
+.card:hover .maximize { background: #1db954; }
+.title {
+  flex: 1;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Content */
+.content { padding: 24px 20px; }
+.icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6));
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+.name {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: 8px;
+}
+.desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* === Icon Variants === */
+.iconOutlined {
+  background: transparent;
+  border: 2px solid rgba(0,0,0,0.1);
+  box-shadow: none;
+}
+.iconFilled {
+  background: linear-gradient(135deg, var(--accent-blue), #5ac8fa);
+  color: white;
+}
+
+/* === Card Style: Minimal === */
+.style_minimal {
+  background: rgba(255,255,255,0.95);
+  border: 1px solid rgba(0,0,0,0.08);
+}
+.style_minimal .header { display: none; }
+.style_minimal .content { padding: 32px 20px; }
+
+/* === Card Style: Glass === */
+.style_glass {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.style_glass .header {
+  background: rgba(255,255,255,0.2);
+  border-bottom-color: rgba(255,255,255,0.1);
+}
+.style_glass .icon {
+  background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.2));
+  backdrop-filter: blur(10px);
+}
+
+/* === Card Style: Neumorphic === */
+.style_neumorphic {
+  background: linear-gradient(145deg, #ffffff, #e6e6e6);
+  box-shadow: 20px 20px 60px #d1d1d1, -20px -20px 60px #ffffff;
+  border: none;
+}
+.style_neumorphic .header {
+  background: transparent;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.style_neumorphic .icon {
+  background: linear-gradient(145deg, #f0f0f0, #ffffff);
+  box-shadow: 5px 5px 15px #d1d1d1, -5px -5px 15px #ffffff;
+}
+
+/* === Card Style: Launchpad === */
+.style_launchpad {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+.style_launchpad:hover {
+  transform: scale(1.1);
+  box-shadow: none;
+}
+.style_launchpad .header { display: none; }
+.style_launchpad .content {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.style_launchpad .icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 10px;
+  font-size: 40px;
+  border-radius: 22%;
+  background: linear-gradient(135deg, var(--lp-a, #007aff), var(--lp-b, #5856d6));
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.15) inset;
+  color: white;
+}
+.style_launchpad:hover .icon {
+  box-shadow: 0 12px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.2) inset;
+}
+.style_launchpad .name {
+  font-size: 13px;
+  font-weight: 500;
+  color: white;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  margin-bottom: 0;
+}
+.style_launchpad .desc { display: none; }
+
+/* Dark mode */
+:root.dark .icon {
+  background: linear-gradient(135deg, rgba(60,60,60,0.9), rgba(40,40,40,0.7));
+}
+
+@media (max-width: 768px) {
+  .style_launchpad .icon {
+    width: 64px;
+    height: 64px;
+    font-size: 32px;
+    border-radius: 18%;
+  }
+  .style_launchpad .name { font-size: 11px; }
+}

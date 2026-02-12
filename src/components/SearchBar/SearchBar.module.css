@@ -1,0 +1,71 @@
+.wrap {
+  max-width: 600px;
+  margin: 0 auto 60px;
+  animation: fadeInUp 0.8s ease-out 0.2s backwards;
+}
+
+.box {
+  position: relative;
+  width: 100%;
+}
+
+.input {
+  width: 100%;
+  padding: 18px 24px 18px 56px;
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  outline: none;
+  font-family: inherit;
+}
+
+.input::placeholder { color: var(--text-secondary); }
+
+.input:focus {
+  box-shadow: 0 8px 40px rgba(0, 122, 255, 0.2);
+  transform: scale(1.01);
+}
+
+.icon {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+/* Launchpad 变体 */
+.launchpad { max-width: 360px; }
+
+.launchpad .input {
+  padding: 12px 20px 12px 48px;
+  font-size: 15px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: none;
+}
+
+.launchpad .input::placeholder { color: rgba(255, 255, 255, 0.6); }
+
+.launchpad .input:focus {
+  background: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
+  transform: none;
+}
+
+.launchpad .icon { color: rgba(255, 255, 255, 0.6); }
+
+:root.dark .input {
+  background: rgba(40, 40, 40, 0.9);
+  color: white;
+}
