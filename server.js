@@ -8,17 +8,17 @@ const app = express()
 const port = process.env.PORT || 80
 
 const CONFIG_PATH = process.env.CONFIG_PATH || resolve('./user-data/nav.yaml')
-const DEFAULT_CONFIG_PATH = resolve('./dist/nav.default.yaml')
+const SEED_CONFIG_PATH = resolve('./dist/nav.yaml')
 const NAV_PASSWORD = process.env.NAV_PASSWORD || 'admin'
 const JWT_SECRET = process.env.NAV_JWT_SECRET || ('nav-app-secret-' + NAV_PASSWORD)
 
-// Seed user-data/nav.yaml from default if missing
+// Seed user-data/nav.yaml from dist/nav.yaml if missing
 if (!existsSync(CONFIG_PATH)) {
   try {
-    copyFileSync(DEFAULT_CONFIG_PATH, CONFIG_PATH)
-    console.log(`Seeded ${CONFIG_PATH} from ${DEFAULT_CONFIG_PATH}`)
+    copyFileSync(SEED_CONFIG_PATH, CONFIG_PATH)
+    console.log(`Seeded ${CONFIG_PATH} from ${SEED_CONFIG_PATH}`)
   } catch {
-    console.warn(`Default config not found at ${DEFAULT_CONFIG_PATH}, skipping seed`)
+    console.warn(`Seed config not found at ${SEED_CONFIG_PATH}, skipping`)
   }
 }
 
@@ -52,15 +52,6 @@ app.get('/api/config', (_req, res) => {
     res.json(yaml.load(raw))
   } catch {
     res.status(500).json({ error: 'Config not found' })
-  }
-})
-
-app.get('/api/default-config', (_req, res) => {
-  try {
-    const raw = readFileSync(DEFAULT_CONFIG_PATH, 'utf-8')
-    res.json(yaml.load(raw))
-  } catch {
-    res.status(500).json({ error: 'Default config not found' })
   }
 })
 

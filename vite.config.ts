@@ -10,7 +10,7 @@ export default defineConfig({
     {
       name: 'copy-nav-yaml',
       closeBundle() {
-        copyFileSync('user-data/nav.yaml', 'dist/nav.default.yaml')
+        copyFileSync('user-data/nav.yaml', 'dist/nav.yaml')
       },
     },
   ],
