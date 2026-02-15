@@ -153,6 +153,14 @@ export default function App() {
     })
   }, [updateConfig])
 
+  // Rename category inline
+  const handleRenameCategory = useCallback((catIdx: number, newTitle: string) => {
+    updateConfig((prev) => ({
+      ...prev,
+      categories: prev.categories.map((c, i) => i === catIdx ? { ...c, title: newTitle } : c),
+    }))
+  }, [updateConfig])
+
   // Reorder dock items
   const handleReorderDock = useCallback((fromIdx: number, toIdx: number) => {
     updateConfig((prev) => {
@@ -200,6 +208,7 @@ export default function App() {
             nameFontSize={config.settings?.nameFontSize}
             onCardContextMenu={handleCardContext}
             onReorderCard={handleReorderCard}
+            onRenameCategory={handleRenameCategory}
           />
         ))}
       </main>

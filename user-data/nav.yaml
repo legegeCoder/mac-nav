@@ -36,14 +36,6 @@ categories:
         color:
           - '#34c759'
           - '#30d158'
-      - name: Stack Overflow
-        url: https://stackoverflow.com
-        emoji: 📚
-        faIcon: fab fa-stack-overflow
-        desc: 开发者问答社区
-        color:
-          - '#af52de'
-          - '#bf5af2'
       - name: 百度
         url: https://www.baidu.com
         desc: ''
@@ -52,6 +44,14 @@ categories:
           - '#5856d6'
         icon: https://www.baidu.com/favicon.ico
         iconText: baid
+      - name: Stack Overflow
+        url: https://stackoverflow.com
+        emoji: 📚
+        faIcon: fab fa-stack-overflow
+        desc: 开发者问答社区
+        color:
+          - '#af52de'
+          - '#bf5af2'
       - name: kimi
         url: https://www.kimi.com/
         desc: ''
@@ -86,6 +86,16 @@ categories:
         color:
           - '#007aff'
           - '#5856d6'
+      - name: Notion
+        url: https://notion.so
+        emoji: 📝
+        faIcon: fas fa-note-sticky
+        desc: 笔记与知识管理
+        color:
+          - '#ff375f'
+          - '#ff2d55'
+  - title: 工具二
+    links:
       - name: Vercel
         url: https://vercel.com
         emoji: ▲
@@ -96,14 +106,8 @@ categories:
           - '#007aff'
         icon: https://vercel.com/favicon.ico
         iconText: verc
-      - name: Notion
-        url: https://notion.so
-        emoji: 📝
-        faIcon: fas fa-note-sticky
-        desc: 笔记与知识管理
-        color:
-          - '#ff375f'
-          - '#ff2d55'
+  - title: 空工具（单击编辑）
+    links: []
 dock:
   items:
     - name: Google
@@ -118,9 +122,3 @@ dock:
     - name: 设置
       action: settings
       emoji: ⚙️
-    - name: 下载
-      url: '#'
-      emoji: 📥
-    - name: 废纸篓
-      url: '#'
-      emoji: 🗑️

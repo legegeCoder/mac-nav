@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import type { Category } from '../../types/nav'
 import type { NavLink } from '../../types/nav'
 import type { CardStyle, IconStyle } from '../../hooks/useSettings'
@@ -15,11 +15,30 @@ interface Props {
   nameFontSize?: number
   onCardContextMenu?: (e: React.MouseEvent, link: NavLink) => void
   onReorderCard?: (fromCat: number, fromIdx: number, toCat: number, toIdx: number) => void
+  onRenameCategory?: (catIdx: number, newTitle: string) => void
 }
 
-export default function CategorySection({ category, catIdx, cardStyle, iconStyle, linkTarget, iconSize, nameFontSize, onCardContextMenu, onReorderCard }: Props) {
+export default function CategorySection({ category, catIdx, cardStyle, iconStyle, linkTarget, iconSize, nameFontSize, onCardContextMenu, onReorderCard, onRenameCategory }: Props) {
+  const [editing, setEditing] = useState(false)
+  const [editTitle, setEditTitle] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
   const [gridDragOver, setGridDragOver] = useState(false)
   const dragCounter = useRef(0)
+
+  const startEditing = useCallback(() => {
+    if (!onRenameCategory || editing) return
+    setEditTitle(category.title)
+    setEditing(true)
+    setTimeout(() => inputRef.current?.select(), 0)
+  }, [category.title, onRenameCategory, editing])
+
+  const commitEdit = useCallback(() => {
+    setEditing(false)
+    const trimmed = editTitle.trim()
+    if (trimmed && trimmed !== category.title && onRenameCategory) {
+      onRenameCategory(catIdx, trimmed)
+    }
+  }, [editTitle, category.title, catIdx, onRenameCategory])
 
   const gridCls = [
     s.grid,
@@ -64,8 +83,18 @@ export default function CategorySection({ category, catIdx, cardStyle, iconStyle
 
   return (
     <section>
-      <h2 className={`${s.title} ${cardStyle === 'launchpad' ? s.titleLaunchpad : ''}`}>
-        {category.title}
+      <h2 className={`${s.title} ${cardStyle === 'launchpad' ? s.titleLaunchpad : ''}`} onClick={startEditing} style={onRenameCategory ? { cursor: 'pointer' } : undefined}>
+        {editing ? (
+          <input
+            ref={inputRef}
+            className={s.titleInput}
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            onClick={(e) => e.stopPropagation()}
+            onBlur={commitEdit}
+            onKeyDown={(e) => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') setEditing(false) }}
+          />
+        ) : category.title}
       </h2>
       <div
         className={gridCls}
