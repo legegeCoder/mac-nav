@@ -26,7 +26,7 @@ export default function App() {
   const { config, updateConfig, resetConfig, exportYaml, importYaml } = useNavConfig()
   const { cardStyle, setCardStyle, iconStyle, setIconStyle } = useSettings()
   const { greeting } = useClock()
-  const { isLoggedIn, login, logout } = useAuth()
+  const { isLoggedIn, verifying, login, logout } = useAuth()
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [ctx, setCtx] = useState<CtxState | null>(null)
 
@@ -163,7 +163,7 @@ export default function App() {
     })
   }, [updateConfig])
 
-  if (!config) {
+  if (verifying || !config) {
     return <BgDecoration />
   }
 

@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync, existsSync, copyFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import yaml from 'js-yaml'
 import jwt from 'jsonwebtoken'
+import bcrypt from 'bcryptjs'
 
 const app = express()
 const port = process.env.PORT || 80
@@ -11,6 +12,7 @@ const CONFIG_PATH = process.env.CONFIG_PATH || resolve('./user-data/nav.yaml')
 const SEED_CONFIG_PATH = resolve('./dist/nav.yaml')
 const NAV_PASSWORD = process.env.NAV_PASSWORD || 'admin'
 const JWT_SECRET = process.env.NAV_JWT_SECRET || ('nav-app-secret-' + NAV_PASSWORD)
+const PASSWORD_HASH = bcrypt.hashSync(NAV_PASSWORD, 10)
 
 // Seed user-data/nav.yaml from dist/nav.yaml if missing
 if (!existsSync(CONFIG_PATH)) {
@@ -26,7 +28,7 @@ app.use(express.json())
 
 app.post('/api/login', (req, res) => {
   const { password } = req.body
-  if (password !== NAV_PASSWORD) {
+  if (!bcrypt.compareSync(password, PASSWORD_HASH)) {
     return res.status(401).json({ error: 'Invalid password' })
   }
   const token = jwt.sign({ role: 'admin' }, JWT_SECRET, { expiresIn: '7d' })
@@ -46,7 +48,11 @@ function requireAuth(req, res, next) {
   }
 }
 
-app.get('/api/config', (_req, res) => {
+app.get('/api/verify', requireAuth, (_req, res) => {
+  res.json({ ok: true })
+})
+
+app.get('/api/config', requireAuth, (_req, res) => {
   try {
     const raw = readFileSync(CONFIG_PATH, 'utf-8')
     res.json(yaml.load(raw))

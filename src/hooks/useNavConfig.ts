@@ -5,7 +5,15 @@ import type { NavConfig } from '../types/nav'
 
 async function fetchRemoteConfig(): Promise<NavConfig | null> {
   try {
-    const res = await fetch('/api/config')
+    const token = getAuthToken()
+    const res = await fetch('/api/config', {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+    if (res.status === 401) {
+      clearAuthToken()
+      window.location.reload()
+      return null
+    }
     if (!res.ok) return null
     const data = await res.json()
     if (data?.categories && data?.dock) return data as NavConfig

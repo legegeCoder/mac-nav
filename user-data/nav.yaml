@@ -17,22 +17,6 @@ settings:
 categories:
   - title: ✨ 常用工具
     links:
-      - name: GitHub
-        url: https://github.com
-        emoji: 🐙
-        faIcon: fab fa-github
-        desc: 代码托管与协作
-        color:
-          - '#007aff'
-          - '#5856d6'
-      - name: ChatGPT
-        url: https://chatgpt.com
-        emoji: 🤖
-        faIcon: fas fa-robot
-        desc: AI 助手对话
-        color:
-          - '#34c759'
-          - '#30d158'
       - name: Claude
         url: https://claude.ai
         emoji: 🧠
@@ -41,16 +25,14 @@ categories:
         color:
           - '#ff9f0a'
           - '#ff6723'
-      - name: Notion
-        url: https://notion.so
-        emoji: 📝
-        faIcon: fas fa-note-sticky
-        desc: 笔记与知识管理
+      - name: ChatGPT
+        url: https://chatgpt.com
+        emoji: 🤖
+        faIcon: fas fa-robot
+        desc: AI 助手对话
         color:
-          - '#ff375f'
-          - '#ff2d55'
-  - title: 💻 开发工具
-    links:
+          - '#34c759'
+          - '#30d158'
       - name: Stack Overflow
         url: https://stackoverflow.com
         emoji: 📚
@@ -59,6 +41,8 @@ categories:
         color:
           - '#af52de'
           - '#bf5af2'
+  - title: 💻 开发工具
+    links:
       - name: MDN Web Docs
         url: https://developer.mozilla.org
         emoji: 🦖
@@ -75,6 +59,14 @@ categories:
         color:
           - '#ff2d55'
           - '#ff6482'
+      - name: GitHub
+        url: https://github.com
+        emoji: 🐙
+        faIcon: fab fa-github
+        desc: 代码托管与协作
+        color:
+          - '#007aff'
+          - '#5856d6'
       - name: Vercel
         url: https://vercel.com
         emoji: ▲
@@ -83,6 +75,14 @@ categories:
         color:
           - '#5856d6'
           - '#007aff'
+      - name: Notion
+        url: https://notion.so
+        emoji: 📝
+        faIcon: fas fa-note-sticky
+        desc: 笔记与知识管理
+        color:
+          - '#ff375f'
+          - '#ff2d55'
 dock:
   items:
     - name: Google

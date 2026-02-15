@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 
 const TOKEN_KEY = 'nav-auth-token'
 
@@ -6,6 +6,28 @@ export function useAuth() {
   const [token, setToken] = useState<string | null>(
     () => localStorage.getItem(TOKEN_KEY)
   )
+  const [verifyStatus, setVerifyStatus] = useState<'pending' | 'done'>(
+    () => localStorage.getItem(TOKEN_KEY) ? 'pending' : 'done'
+  )
+
+  useEffect(() => {
+    const stored = localStorage.getItem(TOKEN_KEY)
+    if (!stored) return
+    fetch('/api/verify', {
+      headers: { Authorization: `Bearer ${stored}` },
+    })
+      .then((res) => {
+        if (!res.ok) {
+          localStorage.removeItem(TOKEN_KEY)
+          setToken(null)
+        }
+      })
+      .catch(() => {
+        localStorage.removeItem(TOKEN_KEY)
+        setToken(null)
+      })
+      .finally(() => setVerifyStatus('done'))
+  }, [])
 
   const login = useCallback(async (password: string): Promise<boolean> => {
     try {
@@ -29,7 +51,7 @@ export function useAuth() {
     setToken(null)
   }, [])
 
-  return { token, isLoggedIn: !!token, login, logout }
+  return { token, isLoggedIn: !!token, verifying: verifyStatus === 'pending', login, logout }
 }
 
 export function getAuthToken(): string | null {
