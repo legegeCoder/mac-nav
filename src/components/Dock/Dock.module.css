@@ -95,6 +95,21 @@
   margin: 0 4px;
 }
 
+/* Favicon image inside dock icon */
+.faviconImg {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+.iconText {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+
 :root.dark .icon {
   background: linear-gradient(135deg, rgba(60,60,60,0.95), rgba(40,40,40,0.8));
 }

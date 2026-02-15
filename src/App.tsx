@@ -60,7 +60,7 @@ export default function App() {
   const handleDropLink = useCallback((link: NavLink) => {
     updateConfig((prev) => {
       if (prev.dock.items.some((d) => d.url === link.url)) return prev
-      return { ...prev, dock: { ...prev.dock, items: [...prev.dock.items, { name: link.name, url: link.url, emoji: link.emoji }] } }
+      return { ...prev, dock: { ...prev.dock, items: [...prev.dock.items, { name: link.name, url: link.url, emoji: '', icon: link.icon, iconText: link.iconText }] } }
     })
   }, [updateConfig])
 
@@ -187,7 +187,7 @@ export default function App() {
           name={config.greeting.name}
           subtitle={config.greeting.subtitle}
         />
-        <SearchBar isLaunchpad={cardStyle === 'launchpad'} />
+        {config.settings?.showSearch !== false && <SearchBar isLaunchpad={cardStyle === 'launchpad'} />}
         {config.categories.map((cat, catIdx) => (
           <CategorySection
             key={cat.title}
@@ -196,6 +196,8 @@ export default function App() {
             cardStyle={cardStyle}
             iconStyle={iconStyle}
             linkTarget={linkTarget}
+            iconSize={config.settings?.iconSize}
+            nameFontSize={config.settings?.nameFontSize}
             onCardContextMenu={handleCardContext}
             onReorderCard={handleReorderCard}
           />

@@ -12,6 +12,17 @@ interface Props {
   onReorderDock?: (fromIdx: number, toIdx: number) => void
 }
 
+function DockIcon({ item }: { item: DockItem }) {
+  const [err, setErr] = useState(false)
+  if (item.icon && !err) {
+    return <img src={item.icon} alt="" className={s.faviconImg} onError={() => setErr(true)} />
+  }
+  if (item.iconText) {
+    return <span className={s.iconText}>{item.iconText}</span>
+  }
+  return <>{item.emoji}</>
+}
+
 export default function Dock({ items, utilities, linkTarget, onSettingsClick, onDropLink, onItemContextMenu, onReorderDock }: Props) {
   const [dragOver, setDragOver] = useState(false)
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null)
@@ -109,7 +120,7 @@ export default function Dock({ items, utilities, linkTarget, onSettingsClick, on
             onContextMenu={(e) => handleItemContext(e, item, idx)}
           >
             <span className={s.label}>{item.name}</span>
-            <div className={s.icon}>{item.emoji}</div>
+            <div className={s.icon}><DockIcon item={item} /></div>
           </a>
         ))}
         <div className={s.divider} />
@@ -121,7 +132,7 @@ export default function Dock({ items, utilities, linkTarget, onSettingsClick, on
             onClick={(e) => handleClick(item, e)}
           >
             <span className={s.label}>{item.name}</span>
-            <div className={s.icon}>{item.emoji}</div>
+            <div className={s.icon}><DockIcon item={item} /></div>
           </a>
         ))}
       </div>

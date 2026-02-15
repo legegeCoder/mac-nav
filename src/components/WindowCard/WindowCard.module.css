@@ -43,8 +43,8 @@
 /* Content */
 .content { padding: 24px 20px; }
 .icon {
-  width: 56px;
-  height: 56px;
+  width: var(--icon-size, 56px);
+  height: var(--icon-size, 56px);
   margin: 0 auto 16px;
   display: flex;
   align-items: center;
@@ -55,7 +55,7 @@
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 .name {
-  font-size: 17px;
+  font-size: var(--name-fs, 17px);
   font-weight: 600;
   color: var(--text-primary);
   text-align: center;
@@ -137,8 +137,8 @@
   align-items: center;
 }
 .style_launchpad .icon {
-  width: 80px;
-  height: 80px;
+  width: var(--icon-size, 80px);
+  height: var(--icon-size, 80px);
   margin: 0 auto 10px;
   font-size: 40px;
   border-radius: 22%;
@@ -157,6 +157,44 @@
   margin-bottom: 0;
 }
 .style_launchpad .desc { display: none; }
+
+/* Favicon image inside icon — fill the entire container */
+.faviconImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+/* When icon has a favicon, remove background */
+.iconHasImg {
+  background: none;
+  box-shadow: none;
+}
+
+/* Text fallback icon */
+.iconText {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+.iconFilled .iconText { color: white; }
+.style_launchpad .iconText {
+  font-size: 18px;
+  color: white;
+}
+
+/* Launchpad: favicon icon gets clean look, no gradient bg */
+.style_launchpad .iconLpClean {
+  background: none;
+  box-shadow: none;
+  overflow: hidden;
+}
+.style_launchpad:hover .iconLpClean {
+  box-shadow: none;
+}
 
 /* Dark mode */
 :root.dark .icon {

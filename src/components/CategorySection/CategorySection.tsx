@@ -11,11 +11,13 @@ interface Props {
   cardStyle: CardStyle
   iconStyle: IconStyle
   linkTarget: 'new' | 'self'
+  iconSize?: number
+  nameFontSize?: number
   onCardContextMenu?: (e: React.MouseEvent, link: NavLink) => void
   onReorderCard?: (fromCat: number, fromIdx: number, toCat: number, toIdx: number) => void
 }
 
-export default function CategorySection({ category, catIdx, cardStyle, iconStyle, linkTarget, onCardContextMenu, onReorderCard }: Props) {
+export default function CategorySection({ category, catIdx, cardStyle, iconStyle, linkTarget, iconSize, nameFontSize, onCardContextMenu, onReorderCard }: Props) {
   const [gridDragOver, setGridDragOver] = useState(false)
   const dragCounter = useRef(0)
 
@@ -85,6 +87,8 @@ export default function CategorySection({ category, catIdx, cardStyle, iconStyle
             iconStyle={iconStyle}
             linkTarget={linkTarget}
             index={i}
+            iconSize={iconSize}
+            nameFontSize={nameFontSize}
             onContextMenu={onCardContextMenu}
             onReorder={onReorderCard}
           />

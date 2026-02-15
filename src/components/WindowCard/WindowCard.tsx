@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { NavLink } from '../../types/nav'
 import type { CardStyle, IconStyle } from '../../hooks/useSettings'
 import s from './WindowCard.module.css'
@@ -10,31 +11,39 @@ interface Props {
   iconStyle: IconStyle
   linkTarget: 'new' | 'self'
   index: number
+  iconSize?: number
+  nameFontSize?: number
   onContextMenu?: (e: React.MouseEvent, link: NavLink) => void
   onReorder?: (fromCat: number, fromIdx: number, toCat: number, toIdx: number) => void
 }
 
-export default function WindowCard({ link, catIdx, linkIdx, cardStyle, iconStyle, linkTarget, index, onContextMenu, onReorder }: Props) {
+export default function WindowCard({ link, catIdx, linkIdx, cardStyle, iconStyle, linkTarget, index, iconSize, nameFontSize, onContextMenu, onReorder }: Props) {
+  const [imgErr, setImgErr] = useState(false)
+
   const cls = [
     s.card,
     cardStyle !== 'default' ? s[`style_${cardStyle}`] : '',
   ].filter(Boolean).join(' ')
 
+  const hasIcon = !!link.icon && !imgErr
+
   const iconCls = [
     s.icon,
     iconStyle === 'outlined' ? s.iconOutlined : '',
     iconStyle === 'filled' ? s.iconFilled : '',
+    hasIcon ? s.iconHasImg : '',
+    cardStyle === 'launchpad' && hasIcon ? s.iconLpClean : '',
   ].filter(Boolean).join(' ')
 
-  const launchpadVars = cardStyle === 'launchpad' && link.color
+  const launchpadVars = cardStyle === 'launchpad' && link.color && !hasIcon
     ? { '--lp-a': link.color[0], '--lp-b': link.color[1] } as React.CSSProperties
     : undefined
 
   const renderIcon = () => {
-    if (iconStyle !== 'emoji' && link.faIcon) {
-      return <i className={link.faIcon} />
+    if (link.icon && !imgErr) {
+      return <img src={link.icon} alt="" className={s.faviconImg} onError={() => setImgErr(true)} />
     }
-    return <>{link.emoji}</>
+    return <span className={s.iconText}>{link.iconText || link.name.slice(0, 2)}</span>
   }
 
   const onDragStart = (e: React.DragEvent) => {
@@ -87,7 +96,7 @@ export default function WindowCard({ link, catIdx, linkIdx, cardStyle, iconStyle
       target={linkTarget === 'new' ? '_blank' : '_self'}
       rel={linkTarget === 'new' ? 'noopener noreferrer' : undefined}
       className={cls}
-      style={{ ...launchpadVars, animationDelay: `${0.1 + index * 0.1}s` }}
+      style={{ ...launchpadVars, animationDelay: `${0.1 + index * 0.1}s`, '--icon-size': iconSize ? `${iconSize}px` : undefined, '--name-fs': nameFontSize ? `${nameFontSize}px` : undefined } as React.CSSProperties}
       draggable
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}

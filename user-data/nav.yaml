@@ -14,6 +14,9 @@ menuBar:
     - 帮助
 settings:
   linkTarget: new
+  iconSize: 56
+  nameFontSize: 17
+  showSearch: false
 categories:
   - title: ✨ 常用工具
     links:
@@ -41,6 +44,22 @@ categories:
         color:
           - '#af52de'
           - '#bf5af2'
+      - name: 百度
+        url: https://www.baidu.com
+        desc: ''
+        color:
+          - '#007aff'
+          - '#5856d6'
+        icon: https://www.baidu.com/favicon.ico
+        iconText: baid
+      - name: kimi
+        url: https://www.kimi.com/
+        desc: ''
+        color:
+          - '#007aff'
+          - '#5856d6'
+        icon: https://www.kimi.com/favicon.ico
+        iconText: kimi
   - title: 💻 开发工具
     links:
       - name: MDN Web Docs
@@ -75,6 +94,8 @@ categories:
         color:
           - '#5856d6'
           - '#007aff'
+        icon: https://vercel.com/favicon.ico
+        iconText: verc
       - name: Notion
         url: https://notion.so
         emoji: 📝
@@ -91,6 +112,8 @@ dock:
     - name: YouTube
       url: https://youtube.com
       emoji: ▶️
+      icon: https://youtube.com/favicon.ico
+      iconText: yout
   utilities:
     - name: 设置
       action: settings
