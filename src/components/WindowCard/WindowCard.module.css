@@ -79,43 +79,6 @@
   color: white;
 }
 
-/* === Card Style: Minimal === */
-.style_minimal {
-  background: rgba(255,255,255,0.95);
-  border: 1px solid rgba(0,0,0,0.08);
-}
-.style_minimal .header { display: none; }
-.style_minimal .content { padding: 32px 20px; }
-
-/* === Card Style: Glass === */
-.style_glass {
-  background: rgba(255,255,255,0.15);
-  border: 1px solid rgba(255,255,255,0.3);
-}
-.style_glass .header {
-  background: rgba(255,255,255,0.2);
-  border-bottom-color: rgba(255,255,255,0.1);
-}
-.style_glass .icon {
-  background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.2));
-  backdrop-filter: blur(10px);
-}
-
-/* === Card Style: Neumorphic === */
-.style_neumorphic {
-  background: linear-gradient(145deg, #ffffff, #e6e6e6);
-  box-shadow: 20px 20px 60px #d1d1d1, -20px -20px 60px #ffffff;
-  border: none;
-}
-.style_neumorphic .header {
-  background: transparent;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
-}
-.style_neumorphic .icon {
-  background: linear-gradient(145deg, #f0f0f0, #ffffff);
-  box-shadow: 5px 5px 15px #d1d1d1, -5px -5px 15px #ffffff;
-}
-
 /* === Card Style: Launchpad === */
 .style_launchpad {
   background: transparent;
@@ -235,10 +198,6 @@
   cursor: default;
 }
 .jiggle:hover {
-  transform: none;
-  box-shadow: 0 4px 30px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.5) inset;
-}
-.style_launchpad.jiggle:hover {
   transform: none;
   box-shadow: none;
 }

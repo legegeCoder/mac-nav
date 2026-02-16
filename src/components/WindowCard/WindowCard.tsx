@@ -1,13 +1,12 @@
 import {useMemo, useState} from 'react'
 import type {NavLink} from '../../types/nav'
-import type {CardStyle, IconStyle} from '../../hooks/useSettings'
+import type {IconStyle} from '../../hooks/useSettings'
 import s from './WindowCard.module.css'
 
 interface Props {
   link: NavLink
   catIdx: number
   linkIdx: number
-  cardStyle: CardStyle
   iconStyle: IconStyle
   linkTarget: 'new' | 'self'
   index: number
@@ -19,12 +18,12 @@ interface Props {
   onDelete?: () => void
 }
 
-export default function WindowCard({ link, catIdx, linkIdx, cardStyle, iconStyle, linkTarget, index, iconSize, nameFontSize, jiggle, onContextMenu, onReorder, onDelete }: Props) {
+export default function WindowCard({ link, catIdx, linkIdx, iconStyle, linkTarget, index, iconSize, nameFontSize, jiggle, onContextMenu, onReorder, onDelete }: Props) {
   const [imgErr, setImgErr] = useState(false)
 
   const cls = [
     s.card,
-    cardStyle !== 'classic' ? s[`style_${cardStyle}`] : '',
+    s.style_launchpad,
     jiggle ? s.jiggle : '',
   ].filter(Boolean).join(' ')
 
@@ -35,10 +34,10 @@ export default function WindowCard({ link, catIdx, linkIdx, cardStyle, iconStyle
     iconStyle === 'outlined' ? s.iconOutlined : '',
     iconStyle === 'filled' ? s.iconFilled : '',
     hasIcon ? s.iconHasImg : '',
-    cardStyle === 'launchpad' && hasIcon ? s.iconLpClean : '',
+    hasIcon ? s.iconLpClean : '',
   ].filter(Boolean).join(' ')
 
-  const launchpadVars = cardStyle === 'launchpad' && link.color && !hasIcon
+  const launchpadVars = link.color && !hasIcon
     ? { '--lp-a': link.color[0], '--lp-b': link.color[1] } as React.CSSProperties
     : undefined
 

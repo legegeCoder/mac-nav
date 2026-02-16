@@ -1,2 +1,2 @@
-export type CardStyle = 'classic' | 'minimal' | 'glass' | 'neumorphic' | 'launchpad'
+export type CardStyle = 'launchpad'
 export type IconStyle = 'default' | 'outlined' | 'filled'

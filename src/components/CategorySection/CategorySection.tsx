@@ -1,13 +1,12 @@
 import {useCallback, useRef, useState} from 'react'
 import type {Category, NavLink} from '../../types/nav'
-import type {CardStyle, IconStyle} from '../../hooks/useSettings'
+import type {IconStyle} from '../../hooks/useSettings'
 import WindowCard from '../WindowCard/WindowCard'
 import s from './CategorySection.module.css'
 
 interface Props {
   category: Category
   catIdx: number
-  cardStyle: CardStyle
   iconStyle: IconStyle
   linkTarget: 'new' | 'self'
   iconSize?: number
@@ -19,7 +18,7 @@ interface Props {
   onDeleteCard?: (catIdx: number, linkIdx: number) => void
 }
 
-export default function CategorySection({ category, catIdx, cardStyle, iconStyle, linkTarget, iconSize, nameFontSize, jiggle, onCardContextMenu, onReorderCard, onRenameCategory, onDeleteCard }: Props) {
+export default function CategorySection({ category, catIdx, iconStyle, linkTarget, iconSize, nameFontSize, jiggle, onCardContextMenu, onReorderCard, onRenameCategory, onDeleteCard }: Props) {
   const [editing, setEditing] = useState(false)
   const [editTitle, setEditTitle] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
@@ -43,7 +42,7 @@ export default function CategorySection({ category, catIdx, cardStyle, iconStyle
 
   const gridCls = [
     s.grid,
-    cardStyle === 'launchpad' ? s.gridLaunchpad : '',
+    s.gridLaunchpad,
     gridDragOver ? s.gridDropTarget : '',
   ].filter(Boolean).join(' ')
 
@@ -84,7 +83,7 @@ export default function CategorySection({ category, catIdx, cardStyle, iconStyle
 
   return (
     <section>
-      <h2 className={`${s.title} ${cardStyle === 'launchpad' ? s.titleLaunchpad : ''}`} onClick={startEditing} style={onRenameCategory ? { cursor: 'pointer' } : undefined}>
+      <h2 className={`${s.title} ${s.titleLaunchpad}`} onClick={startEditing} style={onRenameCategory ? { cursor: 'pointer' } : undefined}>
         {editing ? (
           <input
             ref={inputRef}
@@ -113,7 +112,6 @@ export default function CategorySection({ category, catIdx, cardStyle, iconStyle
             link={link}
             catIdx={catIdx}
             linkIdx={i}
-            cardStyle={cardStyle}
             iconStyle={iconStyle}
             linkTarget={linkTarget}
             index={i}

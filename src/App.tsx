@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
 import {useNavConfig} from './hooks/useNavConfig'
-import type {CardStyle, IconStyle} from './hooks/useSettings'
+import type {IconStyle} from './hooks/useSettings'
 import {useClock} from './hooks/useClock'
 import {useAuth} from './hooks/useAuth'
 import BgDecoration from './components/BgDecoration/BgDecoration'
@@ -31,13 +31,9 @@ export default function App() {
   const [jiggleMode, setJiggleMode] = useState(false)
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const cardStyle = (config?.settings?.cardStyle as CardStyle) || 'launchpad'
   const iconStyle = (config?.settings?.iconStyle as IconStyle) || 'default'
   const linkTarget = config?.settings?.linkTarget || 'new'
 
-  const setCardStyle = useCallback((v: CardStyle) => {
-    updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, cardStyle: v } }))
-  }, [updateConfig])
   const setIconStyle = useCallback((v: IconStyle) => {
     updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, iconStyle: v } }))
   }, [updateConfig])
@@ -251,13 +247,12 @@ export default function App() {
           name={config.greeting.name}
           subtitle={config.greeting.subtitle}
         />
-        {config.settings?.showSearch !== false && <SearchBar isLaunchpad={cardStyle === 'launchpad'} />}
+        {config.settings?.showSearch !== false && <SearchBar isLaunchpad />}
         {config.categories.map((cat, catIdx) => (
           <CategorySection
             key={cat.title}
             category={cat}
             catIdx={catIdx}
-            cardStyle={cardStyle}
             iconStyle={iconStyle}
             linkTarget={linkTarget}
             iconSize={config.settings?.iconSize}
@@ -286,10 +281,8 @@ export default function App() {
       <SettingsPanel
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
-        cardStyle={cardStyle}
         iconStyle={iconStyle}
         linkTarget={linkTarget}
-        setCardStyle={setCardStyle}
         setIconStyle={setIconStyle}
         setLinkTarget={setLinkTarget}
         config={config}

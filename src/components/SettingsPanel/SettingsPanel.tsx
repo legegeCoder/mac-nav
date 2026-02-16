@@ -1,15 +1,13 @@
-import { useEffect, useState, useRef, useCallback } from 'react'
-import type { CardStyle, IconStyle } from '../../hooks/useSettings'
-import type { NavConfig, NavLink, DockItem } from '../../types/nav'
+import {useCallback, useEffect, useRef, useState} from 'react'
+import type {IconStyle} from '../../hooks/useSettings'
+import type {DockItem, NavConfig, NavLink} from '../../types/nav'
 import s from './SettingsPanel.module.css'
 
 interface Props {
   open: boolean
   onClose: () => void
-  cardStyle: CardStyle
   iconStyle: IconStyle
   linkTarget: 'new' | 'self'
-  setCardStyle: (v: CardStyle) => void
   setIconStyle: (v: IconStyle) => void
   setLinkTarget: (v: 'new' | 'self') => void
   config: NavConfig
@@ -31,14 +29,6 @@ type EditMode =
   | { type: 'newCategory'; title: string }
   | { type: 'renameCategory'; idx: number; title: string }
   | { type: 'confirmDelete'; action: () => void; message: string }
-
-const cardOptions: { value: CardStyle; emoji: string; label: string }[] = [
-  { value: 'launchpad', emoji: '🚀', label: '启动台' },
-  { value: 'classic', emoji: '🪟', label: '经典' },
-  { value: 'minimal', emoji: '✨', label: '极简' },
-  { value: 'glass', emoji: '💎', label: '玻璃' },
-  { value: 'neumorphic', emoji: '🎨', label: '新拟态' },
-]
 
 const iconOptions: { value: IconStyle; emoji: string; label: string }[] = [
   { value: 'default', emoji: '🪟', label: '默认' },
@@ -83,7 +73,7 @@ function isValidUrl(str: string): boolean {
 }
 
 export default function SettingsPanel({
-  open, onClose, cardStyle, iconStyle, linkTarget, setCardStyle, setIconStyle, setLinkTarget,
+  open, onClose, iconStyle, linkTarget, setIconStyle, setLinkTarget,
   config, updateConfig, resetConfig, exportYaml, importYaml,
 }: Props) {
   const [section, setSection] = useState<Section>('appearance')
@@ -559,17 +549,6 @@ export default function SettingsPanel({
             {section === 'appearance' && (
               <>
                 <div className={s.sectionTitle}>外观</div>
-                <div className={s.section}>
-                  <div className={s.label}>卡片样式</div>
-                  <div className={s.options}>
-                    {cardOptions.map((opt) => (
-                      <div key={opt.value} className={`${s.option} ${cardStyle === opt.value ? s.optionActive : ''}`} onClick={() => setCardStyle(opt.value)}>
-                        <div className={s.optionPreview}>{opt.emoji}</div>
-                        <div className={s.optionName}>{opt.label}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
                 <div className={s.section}>
                   <div className={s.label}>图标风格</div>
                   <div className={`${s.options} ${s.options3}`}>
