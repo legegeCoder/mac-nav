@@ -18,7 +18,7 @@ function DockIcon({ item }: { item: DockItem }) {
     return <img src={item.icon} alt="" className={s.faviconImg} onError={() => setErr(true)} />
   }
   if (item.iconText) {
-    return <span className={s.iconText}>{item.iconText}</span>
+    return <span className={s.iconText} data-len={Math.min(item.iconText.length, 8)}>{item.iconText}</span>
   }
   return <>{item.emoji}</>
 }

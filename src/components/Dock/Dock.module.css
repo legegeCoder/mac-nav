@@ -109,6 +109,12 @@
   letter-spacing: 0.5px;
   user-select: none;
 }
+.iconText[data-len="3"] { font-size: 12px; }
+.iconText[data-len="4"] { font-size: 11px; }
+.iconText[data-len="5"] { font-size: 9px; letter-spacing: 0; }
+.iconText[data-len="6"] { font-size: 8px; letter-spacing: 0; }
+.iconText[data-len="7"] { font-size: 7px; letter-spacing: 0; }
+.iconText[data-len="8"] { font-size: 6px; letter-spacing: 0; }
 
 :root.dark .icon {
   background: linear-gradient(135deg, rgba(60,60,60,0.95), rgba(40,40,40,0.8));

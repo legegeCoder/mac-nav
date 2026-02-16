@@ -22,7 +22,7 @@ export default function WindowCard({ link, catIdx, linkIdx, cardStyle, iconStyle
 
   const cls = [
     s.card,
-    cardStyle !== 'default' ? s[`style_${cardStyle}`] : '',
+    cardStyle !== 'classic' ? s[`style_${cardStyle}`] : '',
   ].filter(Boolean).join(' ')
 
   const hasIcon = !!link.icon && !imgErr
@@ -43,7 +43,7 @@ export default function WindowCard({ link, catIdx, linkIdx, cardStyle, iconStyle
     if (link.icon && !imgErr) {
       return <img src={link.icon} alt="" className={s.faviconImg} onError={() => setImgErr(true)} />
     }
-    return <span className={s.iconText}>{link.iconText || link.name.slice(0, 2)}</span>
+    return <span className={s.iconText} data-len={Math.min((link.iconText || link.name.slice(0, 2)).length, 8)}>{link.iconText || link.name.slice(0, 2)}</span>
   }
 
   const onDragStart = (e: React.DragEvent) => {

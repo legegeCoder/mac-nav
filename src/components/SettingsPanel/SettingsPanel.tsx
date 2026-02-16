@@ -33,26 +33,26 @@ type EditMode =
   | { type: 'confirmDelete'; action: () => void; message: string }
 
 const cardOptions: { value: CardStyle; emoji: string; label: string }[] = [
-  { value: 'default', emoji: '🪟', label: '默认' },
+  { value: 'launchpad', emoji: '🚀', label: '启动台' },
+  { value: 'classic', emoji: '🪟', label: '经典' },
   { value: 'minimal', emoji: '✨', label: '极简' },
   { value: 'glass', emoji: '💎', label: '玻璃' },
   { value: 'neumorphic', emoji: '🎨', label: '新拟态' },
-  { value: 'launchpad', emoji: '🚀', label: '启动台' },
 ]
 
 const iconOptions: { value: IconStyle; emoji: string; label: string }[] = [
-  { value: 'emoji', emoji: '😊', label: 'Emoji' },
-  { value: 'outlined', emoji: '○', label: '线框' },
-  { value: 'filled', emoji: '●', label: '填充' },
+  { value: 'default', emoji: '🪟', label: '默认' },
+  { value: 'outlined', emoji: '▢', label: '线框' },
+  { value: 'filled', emoji: '▣', label: '填充' },
 ]
 
-/** Extract short text from URL hostname, e.g. https://www.kimi.com/ -> kimi, max 4 chars */
+/** Extract short text from URL hostname, e.g. https://www.kimi.com/ -> kimi, max 8 chars */
 function extractIconText(url: string): string {
   try {
     const host = new URL(url).hostname
     // strip www. prefix, take first domain segment
     const base = host.replace(/^www\./, '').split('.')[0]
-    return base.slice(0, 4)
+    return base.slice(0, 8)
   } catch {
     return ''
   }
@@ -78,6 +78,10 @@ function fetchFavicon(url: string, timeout = 6000): Promise<string> {
 const emptyLink: NavLink = { name: '', url: '', desc: '', color: ['#007aff', '#5856d6'] }
 const emptyDock: DockItem = { name: '', url: '', emoji: '🔗' }
 
+function isValidUrl(str: string): boolean {
+  try { return /^https?:\/\//i.test(new URL(str).href) } catch { return false }
+}
+
 export default function SettingsPanel({
   open, onClose, cardStyle, iconStyle, linkTarget, setCardStyle, setIconStyle, setLinkTarget,
   config, updateConfig, resetConfig, exportYaml, importYaml,
@@ -85,6 +89,10 @@ export default function SettingsPanel({
   const [section, setSection] = useState<Section>('appearance')
   const [editing, setEditing] = useState<EditMode>(null)
   const [fetchingIcon, setFetchingIcon] = useState(false)
+  const [faviconError, setFaviconError] = useState(false)
+  const [iconTextError, setIconTextError] = useState(false)
+  const [iconModeOverride, setIconModeOverride] = useState<'favicon' | 'text' | null>(null)
+  const [stashedIcon, setStashedIcon] = useState<string | undefined>(undefined)
   const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -98,7 +106,11 @@ export default function SettingsPanel({
     return () => document.removeEventListener('keydown', onKey)
   }, [open, onClose, editing])
 
-  useEffect(() => { if (!open) { setEditing(null); setFetchingIcon(false); setSection('appearance') } }, [open])
+  useEffect(() => { if (!open) { setEditing(null); setFetchingIcon(false); setFaviconError(false); setIconTextError(false); setIconModeOverride(null); setStashedIcon(undefined); setSection('appearance') } }, [open])
+
+  // Reset icon mode state when opening a new edit modal (not on field updates within the same modal)
+  const editingId = editing ? `${editing.type}-${'linkIdx' in editing ? editing.linkIdx : 'idx' in editing ? editing.idx : ''}` : null
+  useEffect(() => { setIconModeOverride(null); setStashedIcon(undefined); setFaviconError(false); setIconTextError(false) }, [editingId])
 
   // Listen for external edit requests from context menu
   useEffect(() => {
@@ -122,9 +134,10 @@ export default function SettingsPanel({
     }
   }, [])
 
-  // Auto-fetch favicon when URL changes in link editing
-  const handleLinkUrlBlur = useCallback((url: string) => {
+  // Manual fetch favicon for link editing
+  const fetchLinkFavicon = useCallback(() => {
     if (!editing || editing.type !== 'link') return
+    const url = editing.link.url
     if (!url) return
     const iconText = extractIconText(url)
     setFetchingIcon(true)
@@ -132,14 +145,15 @@ export default function SettingsPanel({
       setFetchingIcon(false)
       setEditing((prev) => {
         if (!prev || prev.type !== 'link') return prev
-        return { ...prev, link: { ...prev.link, icon: icon || undefined, iconText: iconText || undefined } }
+        return { ...prev, link: { ...prev.link, icon: icon || prev.link.icon, iconText: iconText || undefined } }
       })
     })
   }, [editing])
 
-  // Auto-fetch favicon when URL changes in dock editing
-  const handleDockUrlBlur = useCallback((url: string) => {
+  // Manual fetch favicon for dock editing
+  const fetchDockFavicon = useCallback(() => {
     if (!editing || editing.type !== 'dock') return
+    const url = editing.item.url
     if (!url) return
     const iconText = extractIconText(url)
     setFetchingIcon(true)
@@ -147,17 +161,25 @@ export default function SettingsPanel({
       setFetchingIcon(false)
       setEditing((prev) => {
         if (!prev || prev.type !== 'dock') return prev
-        return { ...prev, item: { ...prev.item, icon: icon || undefined, iconText: iconText || undefined } }
+        return { ...prev, item: { ...prev.item, icon: icon || prev.item.icon, iconText: iconText || undefined } }
       })
     })
   }, [editing])
 
   const saveEditing = () => {
     if (!editing) return
+    setFaviconError(false)
+    setIconTextError(false)
+    const inFaviconMode = iconModeOverride === 'favicon' || (iconModeOverride === null && editing.type === 'link' && !!editing.link.icon) || (iconModeOverride === null && editing.type === 'dock' && !!editing.item.icon)
     switch (editing.type) {
       case 'link': {
         const { catIdx, linkIdx, link } = editing
         if (!link.name || !link.url) return
+        if (inFaviconMode) {
+          if (!link.icon || !isValidUrl(link.icon)) { setFaviconError(true); return }
+        } else {
+          if (!link.iconText) { setIconTextError(true); return }
+        }
         updateConfig((prev) => {
           const cats = prev.categories.map((c, i) => {
             if (i !== catIdx) return c
@@ -173,6 +195,11 @@ export default function SettingsPanel({
       case 'dock': {
         const { section, idx, item } = editing
         if (!item.name) return
+        if (inFaviconMode) {
+          if (!item.icon || !isValidUrl(item.icon)) { setFaviconError(true); return }
+        } else {
+          if (!item.iconText) { setIconTextError(true); return }
+        }
         updateConfig((prev) => {
           const arr = [...prev.dock[section]]
           if (idx === -1) arr.push(item)
@@ -255,43 +282,73 @@ export default function SettingsPanel({
     } else if (editing.type === 'link') {
       const { link } = editing
       const update = (patch: Partial<NavLink>) => setEditing({ ...editing, link: { ...link, ...patch } })
-      const isTextIcon = !link.icon && !fetchingIcon
+      const usesFavicon = iconModeOverride === 'favicon' || (iconModeOverride === null && !!link.icon && !fetchingIcon)
       title = editing.linkIdx === -1 ? '添加链接' : '编辑链接'
       content = (
         <div className={s.formGrid}>
           <div className={s.iconPreviewRow}>
             <div
               className={s.iconPreviewBox}
-              style={isTextIcon && link.color ? { background: `linear-gradient(135deg, ${link.color[0]}, ${link.color[1]})` } : undefined}
+              style={!usesFavicon && !fetchingIcon && link.color ? { background: `linear-gradient(135deg, ${link.color[0]}, ${link.color[1]})` } : undefined}
             >
               {fetchingIcon ? (
                 <span className={s.iconSpinner} />
-              ) : link.icon ? (
+              ) : usesFavicon ? (
                 <img src={link.icon} alt="" className={s.iconPreviewImg} />
               ) : (
-                <span className={`${s.iconPreviewText} ${s.iconPreviewTextColored}`}>{link.iconText || extractIconText(link.url) || link.name.slice(0, 2) || '?'}</span>
+                <span className={`${s.iconPreviewText} ${s.iconPreviewTextColored}`} data-len={Math.min((link.iconText || extractIconText(link.url) || link.name.slice(0, 2) || '?').length, 8)}>{link.iconText || extractIconText(link.url) || link.name.slice(0, 2) || '?'}</span>
               )}
             </div>
             <div className={s.iconPreviewInfo}>
-              <span className={s.iconPreviewLabel}>{fetchingIcon ? '正在获取图标...' : link.icon ? '已获取 Favicon' : '文字图标'}</span>
-              <span className={s.iconPreviewSub}>{link.icon ? link.icon.split('/').slice(0, 3).join('/') : (link.iconText || extractIconText(link.url) || '输入网址后自动获取')}</span>
+              <span className={s.iconPreviewLabel}>{fetchingIcon ? '正在获取图标...' : usesFavicon ? (link.icon && isValidUrl(link.icon) ? '已获取 Favicon' : '未获取 Favicon') : '文字图标'}</span>
+              <span className={s.iconPreviewSub}>{usesFavicon ? (link.icon ? link.icon.split('/').slice(0, 3).join('/') : '请填写地址或点击获取') : (link.iconText || extractIconText(link.url) || '手动填写或获取')}</span>
             </div>
           </div>
-          <input className={s.formInput} placeholder="名称" value={link.name} onChange={(e) => update({ name: e.target.value })} autoFocus />
-          <input className={s.formInput} placeholder="网址 (https://...)" value={link.url} onChange={(e) => update({ url: e.target.value })} onBlur={(e) => handleLinkUrlBlur(e.target.value)} />
-          <input className={s.formInput} placeholder="描述" value={link.desc} onChange={(e) => update({ desc: e.target.value })} />
-          {isTextIcon && (
-            <div className={s.colorRow}>
-              <span className={s.colorLabel}>底色</span>
-              <input type="color" className={s.colorInput} value={link.color?.[0] || '#007aff'} onChange={(e) => update({ color: [e.target.value, link.color?.[1] || '#5856d6'] })} />
-              <input type="color" className={s.colorInput} value={link.color?.[1] || '#5856d6'} onChange={(e) => update({ color: [link.color?.[0] || '#007aff', e.target.value] })} />
-            </div>
+          <div className={s.iconModeToggle}>
+            <button className={`${s.iconModeBtn} ${usesFavicon ? s.iconModeBtnActive : ''}`} onClick={() => { if (!usesFavicon) { setIconModeOverride('favicon'); update({ icon: stashedIcon || link.icon || '' }); setFaviconError(false); setIconTextError(false) } }}>Favicon</button>
+            <button className={`${s.iconModeBtn} ${!usesFavicon && !fetchingIcon ? s.iconModeBtnActive : ''}`} onClick={() => { if (usesFavicon) { setStashedIcon(link.icon); setIconModeOverride('text'); update({ icon: undefined }); setFaviconError(false); setIconTextError(false) } }}>文字图标</button>
+          </div>
+          {usesFavicon && (
+            <>
+              <span className={s.formLabel}>Favicon 地址</span>
+              <div className={s.formInputRow}>
+                <input className={`${s.formInput} ${faviconError ? s.formInputError : ''}`} placeholder="https://example.com/favicon.ico" value={link.icon || ''} onChange={(e) => { setFaviconError(false); update({ icon: e.target.value || undefined }) }} />
+                <button className={s.fetchBtn} onClick={fetchLinkFavicon} disabled={fetchingIcon || !link.url}>获取</button>
+              </div>
+              {faviconError && <span className={s.formErrorHint}>请输入合法的图片地址</span>}
+            </>
           )}
+          {!usesFavicon && !fetchingIcon && (
+            <>
+              <span className={s.formLabel}>图标文字</span>
+              <div className={s.formInputRow}>
+                <input className={`${s.formInput} ${iconTextError ? s.formInputError : ''}`} placeholder="最多8字" maxLength={8} value={link.iconText || ''} onChange={(e) => { setIconTextError(false); update({ iconText: e.target.value || undefined }) }} />
+                <button className={s.fetchBtn} onClick={() => {
+                  if (!link.url) { setIconTextError(true); return }
+                  const t = extractIconText(link.url)
+                  if (t) { setIconTextError(false); update({ iconText: t }) } else { setIconTextError(true) }
+                }}>提取</button>
+              </div>
+              {iconTextError && <span className={s.formErrorHint}>{!link.url ? '请先填写网址' : '图标文字不能为空'}</span>}
+              <div className={s.colorRow}>
+                <span className={s.colorLabel}>底色</span>
+                <input type="color" className={s.colorInput} value={link.color?.[0] || '#007aff'} onChange={(e) => update({ color: [e.target.value, link.color?.[1] || '#5856d6'] })} />
+                <input type="color" className={s.colorInput} value={link.color?.[1] || '#5856d6'} onChange={(e) => update({ color: [link.color?.[0] || '#007aff', e.target.value] })} />
+              </div>
+            </>
+          )}
+          <span className={s.formLabel}>名称</span>
+          <input className={s.formInput} placeholder="链接名称" value={link.name} onChange={(e) => update({ name: e.target.value })} autoFocus />
+          <span className={s.formLabel}>网址</span>
+          <input className={s.formInput} placeholder="https://..." value={link.url} onChange={(e) => update({ url: e.target.value })} />
+          <span className={s.formLabel}>描述</span>
+          <input className={s.formInput} placeholder="简短描述（可选）" value={link.desc} onChange={(e) => update({ desc: e.target.value })} />
         </div>
       )
     } else if (editing.type === 'dock') {
       const { item } = editing
       const update = (patch: Partial<DockItem>) => setEditing({ ...editing, item: { ...item, ...patch } })
+      const usesFavicon = iconModeOverride === 'favicon' || (iconModeOverride === null && !!item.icon && !fetchingIcon)
       title = editing.idx === -1 ? '添加 Dock 项' : '编辑 Dock 项'
       content = (
         <div className={s.formGrid}>
@@ -299,36 +356,71 @@ export default function SettingsPanel({
             <div className={s.iconPreviewBox}>
               {fetchingIcon ? (
                 <span className={s.iconSpinner} />
-              ) : item.icon ? (
+              ) : usesFavicon ? (
                 <img src={item.icon} alt="" className={s.iconPreviewImg} />
               ) : (
-                <span className={s.iconPreviewText}>{item.iconText || extractIconText(item.url || '') || item.emoji || '?'}</span>
+                <span className={s.iconPreviewText} data-len={Math.min((item.iconText || extractIconText(item.url || '') || item.emoji || '?').length, 8)}>{item.iconText || extractIconText(item.url || '') || item.emoji || '?'}</span>
               )}
             </div>
             <div className={s.iconPreviewInfo}>
-              <span className={s.iconPreviewLabel}>{fetchingIcon ? '正在获取图标...' : item.icon ? '已获取 Favicon' : '文字图标'}</span>
-              <span className={s.iconPreviewSub}>{item.icon ? item.icon.split('/').slice(0, 3).join('/') : (item.iconText || '输入网址后自动获取')}</span>
+              <span className={s.iconPreviewLabel}>{fetchingIcon ? '正在获取图标...' : usesFavicon ? (item.icon && isValidUrl(item.icon) ? '已获取 Favicon' : '未获取 Favicon') : '文字图标'}</span>
+              <span className={s.iconPreviewSub}>{usesFavicon ? (item.icon ? item.icon.split('/').slice(0, 3).join('/') : '请填写地址或点击获取') : (item.iconText || '手动填写或获取')}</span>
             </div>
           </div>
-          <input className={s.formInput} placeholder="名称" value={item.name} onChange={(e) => update({ name: e.target.value })} autoFocus />
-          <input className={s.formInput} placeholder="网址" value={item.url || ''} onChange={(e) => update({ url: e.target.value })} onBlur={(e) => handleDockUrlBlur(e.target.value)} />
+          <div className={s.iconModeToggle}>
+            <button className={`${s.iconModeBtn} ${usesFavicon ? s.iconModeBtnActive : ''}`} onClick={() => { if (!usesFavicon) { setIconModeOverride('favicon'); update({ icon: stashedIcon || item.icon || '' }); setFaviconError(false); setIconTextError(false) } }}>Favicon</button>
+            <button className={`${s.iconModeBtn} ${!usesFavicon && !fetchingIcon ? s.iconModeBtnActive : ''}`} onClick={() => { if (usesFavicon) { setStashedIcon(item.icon); setIconModeOverride('text'); update({ icon: undefined }); setFaviconError(false); setIconTextError(false) } }}>文字图标</button>
+          </div>
+          {usesFavicon && (
+            <>
+              <span className={s.formLabel}>Favicon 地址</span>
+              <div className={s.formInputRow}>
+                <input className={`${s.formInput} ${faviconError ? s.formInputError : ''}`} placeholder="https://example.com/favicon.ico" value={item.icon || ''} onChange={(e) => { setFaviconError(false); update({ icon: e.target.value || undefined }) }} />
+                <button className={s.fetchBtn} onClick={fetchDockFavicon} disabled={fetchingIcon || !item.url}>获取</button>
+              </div>
+              {faviconError && <span className={s.formErrorHint}>请输入合法的图片地址</span>}
+            </>
+          )}
+          {!usesFavicon && !fetchingIcon && (
+            <>
+              <span className={s.formLabel}>图标文字</span>
+              <div className={s.formInputRow}>
+                <input className={`${s.formInput} ${iconTextError ? s.formInputError : ''}`} placeholder="最多8字" maxLength={8} value={item.iconText || ''} onChange={(e) => { setIconTextError(false); update({ iconText: e.target.value || undefined }) }} />
+                <button className={s.fetchBtn} onClick={() => {
+                  if (!item.url) { setIconTextError(true); return }
+                  const t = extractIconText(item.url)
+                  if (t) { setIconTextError(false); update({ iconText: t }) } else { setIconTextError(true) }
+                }}>提取</button>
+              </div>
+              {iconTextError && <span className={s.formErrorHint}>{!item.url ? '请先填写网址' : '图标文字不能为空'}</span>}
+            </>
+          )}
+          <span className={s.formLabel}>名称</span>
+          <input className={s.formInput} placeholder="Dock 项名称" value={item.name} onChange={(e) => update({ name: e.target.value })} autoFocus />
+          <span className={s.formLabel}>网址</span>
+          <input className={s.formInput} placeholder="https://..." value={item.url || ''} onChange={(e) => update({ url: e.target.value })} />
         </div>
       )
     } else if (editing.type === 'greeting') {
       title = '编辑问候语'
       content = (
         <div className={s.formGrid}>
-          <input className={s.formInput} placeholder="称呼" value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} autoFocus />
-          <input className={s.formInput} placeholder="副标题" value={editing.subtitle} onChange={(e) => setEditing({ ...editing, subtitle: e.target.value })} />
+          <span className={s.formLabel}>称呼</span>
+          <input className={s.formInput} placeholder="你的名字" value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} autoFocus />
+          <span className={s.formLabel}>副标题</span>
+          <input className={s.formInput} placeholder="一句话介绍" value={editing.subtitle} onChange={(e) => setEditing({ ...editing, subtitle: e.target.value })} />
         </div>
       )
     } else if (editing.type === 'profile') {
       title = '编辑个人资料'
       content = (
         <div className={s.formGrid}>
-          <input className={s.formInput} placeholder="头像 URL (https://...)" value={editing.avatar} onChange={(e) => setEditing({ ...editing, avatar: e.target.value })} />
-          <input className={s.formInput} placeholder="称呼" value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} autoFocus />
-          <input className={s.formInput} placeholder="副标题" value={editing.subtitle} onChange={(e) => setEditing({ ...editing, subtitle: e.target.value })} />
+          <span className={s.formLabel}>头像地址</span>
+          <input className={s.formInput} placeholder="https://..." value={editing.avatar} onChange={(e) => setEditing({ ...editing, avatar: e.target.value })} />
+          <span className={s.formLabel}>称呼</span>
+          <input className={s.formInput} placeholder="你的名字" value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} autoFocus />
+          <span className={s.formLabel}>副标题</span>
+          <input className={s.formInput} placeholder="一句话介绍" value={editing.subtitle} onChange={(e) => setEditing({ ...editing, subtitle: e.target.value })} />
         </div>
       )
     } else if (editing.type === 'menuBar') {
@@ -336,9 +428,10 @@ export default function SettingsPanel({
       content = (
         <>
           <div className={s.formGrid}>
-            <input className={s.formInput} placeholder="菜单项（逗号分隔）" value={editing.value} onChange={(e) => setEditing({ ...editing, value: e.target.value })} autoFocus />
+            <span className={s.formLabel}>菜单项</span>
+            <input className={s.formInput} placeholder="逗号分隔，如：访达, 文件, 编辑" value={editing.value} onChange={(e) => setEditing({ ...editing, value: e.target.value })} autoFocus />
           </div>
-          <p className={s.formHint}>多个菜单项用逗号分隔，如：访达, 文件, 编辑</p>
+          <p className={s.formHint}>多个菜单项用逗号分隔</p>
         </>
       )
     } else if (editing.type === 'favicon') {
@@ -346,7 +439,8 @@ export default function SettingsPanel({
       content = (
         <>
           <div className={s.formGrid}>
-            <input className={s.formInput} placeholder="图标 URL (https://...)" value={editing.value} onChange={(e) => setEditing({ ...editing, value: e.target.value })} autoFocus />
+            <span className={s.formLabel}>图标地址</span>
+            <input className={s.formInput} placeholder="https://..." value={editing.value} onChange={(e) => setEditing({ ...editing, value: e.target.value })} autoFocus />
           </div>
           <p className={s.formHint}>填写图标图片地址，留空则使用浏览器默认图标</p>
           {editing.value && <div style={{ textAlign: 'center', padding: '8px 0' }}><img src={editing.value} alt="favicon preview" style={{ width: 32, height: 32, objectFit: 'contain' }} /></div>}
@@ -356,7 +450,8 @@ export default function SettingsPanel({
       title = editing.type === 'newCategory' ? '新建分类' : '重命名分类'
       content = (
         <div className={s.formGrid}>
-          <input className={s.formInput} placeholder="分类名称" value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} autoFocus />
+          <span className={s.formLabel}>分类名称</span>
+          <input className={s.formInput} placeholder="输入分类名称" value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} autoFocus />
         </div>
       )
     }

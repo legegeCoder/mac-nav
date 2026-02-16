@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useNavConfig } from './hooks/useNavConfig'
-import { useSettings } from './hooks/useSettings'
+import type { CardStyle, IconStyle } from './hooks/useSettings'
 import { useClock } from './hooks/useClock'
 import { useAuth } from './hooks/useAuth'
 import BgDecoration from './components/BgDecoration/BgDecoration'
@@ -24,13 +24,21 @@ interface CtxState {
 
 export default function App() {
   const { config, updateConfig, resetConfig, exportYaml, importYaml } = useNavConfig()
-  const { cardStyle, setCardStyle, iconStyle, setIconStyle } = useSettings()
   const { greeting } = useClock()
   const { isLoggedIn, verifying, login, logout } = useAuth()
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [ctx, setCtx] = useState<CtxState | null>(null)
 
+  const cardStyle = (config?.settings?.cardStyle as CardStyle) || 'launchpad'
+  const iconStyle = (config?.settings?.iconStyle as IconStyle) || 'default'
   const linkTarget = config?.settings?.linkTarget || 'new'
+
+  const setCardStyle = useCallback((v: CardStyle) => {
+    updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, cardStyle: v } }))
+  }, [updateConfig])
+  const setIconStyle = useCallback((v: IconStyle) => {
+    updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, iconStyle: v } }))
+  }, [updateConfig])
 
   // Dynamic favicon
   useEffect(() => {

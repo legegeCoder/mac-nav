@@ -24,7 +24,7 @@ export interface DockItem {
 export interface NavConfig {
   greeting: { name: string; subtitle: string }
   menuBar: { items: string[] }
-  settings?: { linkTarget?: 'new' | 'self'; iconSize?: number; nameFontSize?: number; showSearch?: boolean }
+  settings?: { linkTarget?: 'new' | 'self'; iconSize?: number; nameFontSize?: number; showSearch?: boolean; cardStyle?: string; iconStyle?: string }
   favicon?: string
   avatar?: string
   categories: Category[]

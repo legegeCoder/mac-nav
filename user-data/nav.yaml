@@ -17,6 +17,7 @@ settings:
   iconSize: 56
   nameFontSize: 17
   showSearch: false
+  cardStyle: launchpad
 categories:
   - title: ✨ 常用工具
     links:
@@ -28,6 +29,8 @@ categories:
         color:
           - '#ff9f0a'
           - '#ff6723'
+        icon: ''
+        iconText: claude
       - name: ChatGPT
         url: https://chatgpt.com
         emoji: 🤖
@@ -36,6 +39,7 @@ categories:
         color:
           - '#34c759'
           - '#30d158'
+        iconText: chat
       - name: 百度
         url: https://www.baidu.com
         desc: ''
@@ -52,6 +56,8 @@ categories:
         color:
           - '#af52de'
           - '#bf5af2'
+        icon: https://stackoverflow.com/favicon.ico
+        iconText: stac
       - name: kimi
         url: https://www.kimi.com/
         desc: ''
@@ -70,6 +76,8 @@ categories:
         color:
           - '#00c7be'
           - '#64d2ff'
+        icon: https://developer.mozilla.org/favicon.ico
+        iconText: deve
       - name: Figma
         url: https://www.figma.com
         emoji: 🎨
@@ -86,6 +94,8 @@ categories:
         color:
           - '#007aff'
           - '#5856d6'
+        icon: https://github.com/favicon.ico
+        iconText: gith
       - name: Notion
         url: https://notion.so
         emoji: 📝
@@ -113,11 +123,28 @@ dock:
     - name: Google
       url: https://google.com
       emoji: 🔍
+      icon: https://google.com/favicon.ico
+      iconText: goog
     - name: YouTube
       url: https://youtube.com
       emoji: ▶️
-      icon: https://youtube.com/favicon.ico
-      iconText: yout
+      iconText: YouTube
+    - name: Notion
+      url: https://notion.so
+      emoji: ''
+      iconText: Notion
+    - name: kimi
+      url: https://www.kimi.com/
+      emoji: ''
+      icon: https://www.kimi.com/favicon.ico
+      iconText: kimi
+    - name: ChatGPT
+      url: https://chatgpt.com
+      emoji: ''
+      iconText: chat
+    - name: Claude
+      url: https://claude.ai
+      emoji: ''
   utilities:
     - name: 设置
       action: settings
