@@ -1,7 +1,6 @@
-import { useState, useRef, useCallback } from 'react'
-import type { Category } from '../../types/nav'
-import type { NavLink } from '../../types/nav'
-import type { CardStyle, IconStyle } from '../../hooks/useSettings'
+import {useCallback, useRef, useState} from 'react'
+import type {Category, NavLink} from '../../types/nav'
+import type {CardStyle, IconStyle} from '../../hooks/useSettings'
 import WindowCard from '../WindowCard/WindowCard'
 import s from './CategorySection.module.css'
 
@@ -13,12 +12,14 @@ interface Props {
   linkTarget: 'new' | 'self'
   iconSize?: number
   nameFontSize?: number
+  jiggle?: boolean
   onCardContextMenu?: (e: React.MouseEvent, link: NavLink) => void
   onReorderCard?: (fromCat: number, fromIdx: number, toCat: number, toIdx: number) => void
   onRenameCategory?: (catIdx: number, newTitle: string) => void
+  onDeleteCard?: (catIdx: number, linkIdx: number) => void
 }
 
-export default function CategorySection({ category, catIdx, cardStyle, iconStyle, linkTarget, iconSize, nameFontSize, onCardContextMenu, onReorderCard, onRenameCategory }: Props) {
+export default function CategorySection({ category, catIdx, cardStyle, iconStyle, linkTarget, iconSize, nameFontSize, jiggle, onCardContextMenu, onReorderCard, onRenameCategory, onDeleteCard }: Props) {
   const [editing, setEditing] = useState(false)
   const [editTitle, setEditTitle] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
@@ -118,8 +119,10 @@ export default function CategorySection({ category, catIdx, cardStyle, iconStyle
             index={i}
             iconSize={iconSize}
             nameFontSize={nameFontSize}
+            jiggle={jiggle}
             onContextMenu={onCardContextMenu}
             onReorder={onReorderCard}
+            onDelete={() => onDeleteCard?.(catIdx, i)}
           />
         ))}
       </div>

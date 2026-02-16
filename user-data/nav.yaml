@@ -31,23 +31,6 @@ categories:
           - '#ff6723'
         icon: ''
         iconText: claude
-      - name: ChatGPT
-        url: https://chatgpt.com
-        emoji: 🤖
-        faIcon: fas fa-robot
-        desc: AI 助手对话
-        color:
-          - '#34c759'
-          - '#30d158'
-        iconText: chat
-      - name: 百度
-        url: https://www.baidu.com
-        desc: ''
-        color:
-          - '#007aff'
-          - '#5856d6'
-        icon: https://www.baidu.com/favicon.ico
-        iconText: baid
       - name: Stack Overflow
         url: https://stackoverflow.com
         emoji: 📚
@@ -58,6 +41,14 @@ categories:
           - '#bf5af2'
         icon: https://stackoverflow.com/favicon.ico
         iconText: stac
+      - name: 百度
+        url: https://www.baidu.com
+        desc: ''
+        color:
+          - '#007aff'
+          - '#5856d6'
+        icon: https://www.baidu.com/favicon.ico
+        iconText: baid
       - name: kimi
         url: https://www.kimi.com/
         desc: ''
@@ -125,26 +116,6 @@ dock:
       emoji: 🔍
       icon: https://google.com/favicon.ico
       iconText: goog
-    - name: YouTube
-      url: https://youtube.com
-      emoji: ▶️
-      iconText: YouTube
-    - name: Notion
-      url: https://notion.so
-      emoji: ''
-      iconText: Notion
-    - name: kimi
-      url: https://www.kimi.com/
-      emoji: ''
-      icon: https://www.kimi.com/favicon.ico
-      iconText: kimi
-    - name: ChatGPT
-      url: https://chatgpt.com
-      emoji: ''
-      iconText: chat
-    - name: Claude
-      url: https://claude.ai
-      emoji: ''
   utilities:
     - name: 设置
       action: settings

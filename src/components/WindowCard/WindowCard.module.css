@@ -228,3 +228,46 @@
   opacity: 0.5;
   transition: all 0.2s ease;
 }
+
+/* Jiggle mode (macOS long-press delete) */
+.jiggle {
+  animation: jiggle 0.3s ease-in-out infinite alternate;
+  cursor: default;
+}
+.jiggle:hover {
+  transform: none;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.5) inset;
+}
+.style_launchpad.jiggle:hover {
+  transform: none;
+  box-shadow: none;
+}
+@keyframes jiggle {
+  0% { transform: rotate(var(--jiggle-a, -1.5deg)); }
+  100% { transform: rotate(var(--jiggle-b, 1.5deg)); }
+}
+.deleteBadge {
+  position: absolute;
+  top: -8px; left: -8px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: transform 0.15s;
+  border: 1.5px solid rgba(255,255,255,0.3);
+}
+.deleteBadge:hover { transform: scale(1.2); }
+.deleteBadge::before {
+  content: '×';
+  color: white;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1;
+}
+.jiggle .icon {
+  overflow: visible;
+}

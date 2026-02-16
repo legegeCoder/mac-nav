@@ -1,8 +1,8 @@
-import { useState, useCallback, useEffect } from 'react'
-import { useNavConfig } from './hooks/useNavConfig'
-import type { CardStyle, IconStyle } from './hooks/useSettings'
-import { useClock } from './hooks/useClock'
-import { useAuth } from './hooks/useAuth'
+import {useCallback, useEffect, useRef, useState} from 'react'
+import {useNavConfig} from './hooks/useNavConfig'
+import type {CardStyle, IconStyle} from './hooks/useSettings'
+import {useClock} from './hooks/useClock'
+import {useAuth} from './hooks/useAuth'
 import BgDecoration from './components/BgDecoration/BgDecoration'
 import MenuBar from './components/MenuBar/MenuBar'
 import Welcome from './components/Welcome/Welcome'
@@ -10,10 +10,10 @@ import SearchBar from './components/SearchBar/SearchBar'
 import CategorySection from './components/CategorySection/CategorySection'
 import Dock from './components/Dock/Dock'
 import SettingsPanel from './components/SettingsPanel/SettingsPanel'
+import type {MenuItem} from './components/ContextMenu/ContextMenu'
 import ContextMenu from './components/ContextMenu/ContextMenu'
 import LoginPage from './components/LoginPage/LoginPage'
-import type { MenuItem } from './components/ContextMenu/ContextMenu'
-import type { NavLink, DockItem } from './types/nav'
+import type {DockItem, NavLink} from './types/nav'
 import './styles/global.css'
 
 interface CtxState {
@@ -28,6 +28,8 @@ export default function App() {
   const { isLoggedIn, verifying, login, logout } = useAuth()
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [ctx, setCtx] = useState<CtxState | null>(null)
+  const [jiggleMode, setJiggleMode] = useState(false)
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const cardStyle = (config?.settings?.cardStyle as CardStyle) || 'launchpad'
   const iconStyle = (config?.settings?.iconStyle as IconStyle) || 'default'
@@ -179,6 +181,46 @@ export default function App() {
     })
   }, [updateConfig])
 
+  // Jiggle mode: long-press to enter, click background to exit
+  const handleMainMouseDown = useCallback(() => {
+    longPressTimer.current = setTimeout(() => { setJiggleMode(true); setCtx(null) }, 600)
+  }, [])
+  const handleMainMouseUp = useCallback(() => {
+    if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null }
+  }, [])
+  const handleMainClick = useCallback((e: React.MouseEvent) => {
+    if (!jiggleMode) return
+    // Only exit if clicking the background, not a card/badge
+    if ((e.target as HTMLElement).closest('a, [class*="deleteBadge"], [class*="DeleteBadge"]')) return
+    setJiggleMode(false)
+  }, [jiggleMode])
+
+  // Escape exits jiggle mode
+  useEffect(() => {
+    if (!jiggleMode) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setJiggleMode(false) }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [jiggleMode])
+
+  // Delete card (from jiggle mode)
+  const handleDeleteCard = useCallback((catIdx: number, linkIdx: number) => {
+    updateConfig((prev) => ({
+      ...prev,
+      categories: prev.categories.map((c, i) =>
+        i !== catIdx ? c : { ...c, links: c.links.filter((_, j) => j !== linkIdx) }
+      ),
+    }))
+  }, [updateConfig])
+
+  // Delete dock item (from jiggle mode)
+  const handleDeleteDockItem = useCallback((idx: number) => {
+    updateConfig((prev) => ({
+      ...prev,
+      dock: { ...prev.dock, items: prev.dock.items.filter((_, i) => i !== idx) },
+    }))
+  }, [updateConfig])
+
   if (verifying || !config) {
     return <BgDecoration />
   }
@@ -197,7 +239,13 @@ export default function App() {
       <BgDecoration />
       <MenuBar items={config.menuBar.items} icon={config.favicon} onLogout={logout} />
 
-      <main style={{ position: 'relative', zIndex: 1, padding: '80px 40px 140px', maxWidth: 1400, margin: '0 auto' }}>
+      <main
+        style={{ position: 'relative', zIndex: 1, padding: '80px 40px 140px', maxWidth: 1400, margin: '0 auto' }}
+        onMouseDown={handleMainMouseDown}
+        onMouseUp={handleMainMouseUp}
+        onMouseLeave={handleMainMouseUp}
+        onClick={handleMainClick}
+      >
         <Welcome
           greeting={greeting}
           name={config.greeting.name}
@@ -214,9 +262,11 @@ export default function App() {
             linkTarget={linkTarget}
             iconSize={config.settings?.iconSize}
             nameFontSize={config.settings?.nameFontSize}
+            jiggle={jiggleMode}
             onCardContextMenu={handleCardContext}
             onReorderCard={handleReorderCard}
             onRenameCategory={handleRenameCategory}
+            onDeleteCard={handleDeleteCard}
           />
         ))}
       </main>
@@ -225,10 +275,12 @@ export default function App() {
         items={config.dock.items}
         utilities={config.dock.utilities}
         linkTarget={linkTarget}
+        jiggle={jiggleMode}
         onSettingsClick={() => setSettingsOpen(true)}
         onDropLink={handleDropLink}
         onItemContextMenu={handleDockContext}
         onReorderDock={handleReorderDock}
+        onDeleteDockItem={handleDeleteDockItem}
       />
 
       <SettingsPanel

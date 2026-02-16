@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import type { NavLink } from '../../types/nav'
-import type { CardStyle, IconStyle } from '../../hooks/useSettings'
+import {useMemo, useState} from 'react'
+import type {NavLink} from '../../types/nav'
+import type {CardStyle, IconStyle} from '../../hooks/useSettings'
 import s from './WindowCard.module.css'
 
 interface Props {
@@ -13,16 +13,19 @@ interface Props {
   index: number
   iconSize?: number
   nameFontSize?: number
+  jiggle?: boolean
   onContextMenu?: (e: React.MouseEvent, link: NavLink) => void
   onReorder?: (fromCat: number, fromIdx: number, toCat: number, toIdx: number) => void
+  onDelete?: () => void
 }
 
-export default function WindowCard({ link, catIdx, linkIdx, cardStyle, iconStyle, linkTarget, index, iconSize, nameFontSize, onContextMenu, onReorder }: Props) {
+export default function WindowCard({ link, catIdx, linkIdx, cardStyle, iconStyle, linkTarget, index, iconSize, nameFontSize, jiggle, onContextMenu, onReorder, onDelete }: Props) {
   const [imgErr, setImgErr] = useState(false)
 
   const cls = [
     s.card,
     cardStyle !== 'classic' ? s[`style_${cardStyle}`] : '',
+    jiggle ? s.jiggle : '',
   ].filter(Boolean).join(' ')
 
   const hasIcon = !!link.icon && !imgErr
@@ -38,6 +41,14 @@ export default function WindowCard({ link, catIdx, linkIdx, cardStyle, iconStyle
   const launchpadVars = cardStyle === 'launchpad' && link.color && !hasIcon
     ? { '--lp-a': link.color[0], '--lp-b': link.color[1] } as React.CSSProperties
     : undefined
+
+  // Randomize jiggle angle per card so they don't all move in sync
+  const jiggleVars = useMemo(() => {
+    const a = -(1 + Math.random() * 1.5)
+    const b = 1 + Math.random() * 1.5
+    const delay = Math.random() * 0.2
+    return { '--jiggle-a': `${a}deg`, '--jiggle-b': `${b}deg`, animationDelay: `${delay}s` } as React.CSSProperties
+  }, [])
 
   const renderIcon = () => {
     if (link.icon && !imgErr) {
@@ -90,13 +101,17 @@ export default function WindowCard({ link, catIdx, linkIdx, cardStyle, iconStyle
     }
   }
 
-  return (
+  const handleClick = (e: React.MouseEvent) => {
+    if (jiggle) { e.preventDefault() }
+  }
+
+  const card = (
     <a
       href={link.url}
       target={linkTarget === 'new' ? '_blank' : '_self'}
       rel={linkTarget === 'new' ? 'noopener noreferrer' : undefined}
       className={cls}
-      style={{ ...launchpadVars, animationDelay: `${0.1 + index * 0.1}s`, '--icon-size': iconSize ? `${iconSize}px` : undefined, '--name-fs': nameFontSize ? `${nameFontSize}px` : undefined } as React.CSSProperties}
+      style={{ ...launchpadVars, ...(jiggle ? jiggleVars : {}), animationDelay: jiggle ? jiggleVars.animationDelay : `${0.1 + index * 0.1}s`, '--icon-size': iconSize ? `${iconSize}px` : undefined, '--name-fs': nameFontSize ? `${nameFontSize}px` : undefined } as React.CSSProperties}
       draggable
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
@@ -104,6 +119,7 @@ export default function WindowCard({ link, catIdx, linkIdx, cardStyle, iconStyle
       onDragLeave={onDragLeave}
       onDrop={onDrop}
       onContextMenu={handleContextMenu}
+      onClick={handleClick}
     >
       <div className={s.header}>
         <div className={s.controls}>
@@ -114,10 +130,15 @@ export default function WindowCard({ link, catIdx, linkIdx, cardStyle, iconStyle
         <span className={s.title}>{link.name}</span>
       </div>
       <div className={s.content}>
-        <div className={iconCls}>{renderIcon()}</div>
+        <div className={iconCls} style={{ position: 'relative' }}>
+          {jiggle && <div className={s.deleteBadge} onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete?.() }} />}
+          {renderIcon()}
+        </div>
         <h3 className={s.name}>{link.name}</h3>
         <p className={s.desc}>{link.desc}</p>
       </div>
     </a>
   )
+
+  return card
 }

@@ -139,3 +139,41 @@
   transform: translateY(-5px) scale(1.1);
   transition: all 0.2s ease;
 }
+
+/* Jiggle mode */
+.jiggleItem .icon {
+  animation: dockJiggle 0.3s ease-in-out infinite alternate;
+}
+.jiggleItem:hover .icon {
+  transform: none;
+}
+.jiggleItem:hover + .item .icon,
+.jiggleItem:has(+ .item:hover) .icon {
+  transform: none;
+}
+@keyframes dockJiggle {
+  0% { transform: rotate(var(--jiggle-a, -2deg)); }
+  100% { transform: rotate(var(--jiggle-b, 2deg)); }
+}
+.dockDeleteBadge {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: transform 0.15s;
+  border: 1.5px solid rgba(255,255,255,0.3);
+}
+.dockDeleteBadge:hover { transform: scale(1.2); }
+.dockDeleteBadge::before {
+  content: '×';
+  color: white;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1;
+}
