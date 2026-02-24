@@ -23,14 +23,19 @@ interface CtxState {
 }
 
 export default function App() {
-  const { config, updateConfig, resetConfig, exportYaml, importYaml, refetch } = useNavConfig()
+  const { config, updateConfig, resetConfig, exportYaml, importYaml, refetch, fetchGuest } = useNavConfig()
   const { greeting } = useClock()
   const { isLoggedIn, verifying, login, logout } = useAuth()
 
-  // Fetch config after login status changes to logged-in
+  const [showLoginModal, setShowLoginModal] = useState(false)
+
+  // Fetch config based on login state after verification completes
   useEffect(() => {
-    if (isLoggedIn && !config) refetch()
-  }, [isLoggedIn, config, refetch])
+    if (verifying) return
+    if (isLoggedIn) refetch()
+    else fetchGuest()
+  }, [verifying, isLoggedIn, refetch, fetchGuest])
+
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [ctx, setCtx] = useState<CtxState | null>(null)
   const [jiggleMode, setJiggleMode] = useState(false)
@@ -58,12 +63,13 @@ export default function App() {
     updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, linkTarget: v } }))
   }, [updateConfig])
 
-  // Block native context menu globally
+  // Block native context menu globally (only when logged in)
   useEffect(() => {
+    if (!isLoggedIn) return
     const handler = (e: MouseEvent) => e.preventDefault()
     document.addEventListener('contextmenu', handler)
     return () => document.removeEventListener('contextmenu', handler)
-  }, [])
+  }, [isLoggedIn])
 
   const closeCtx = useCallback(() => setCtx(null), [])
 
@@ -222,17 +228,15 @@ export default function App() {
     }))
   }, [updateConfig])
 
+  // Login from modal: close modal after success
+  const handleLoginFromModal = useCallback(async (password: string) => {
+    const ok = await login(password)
+    if (ok) setShowLoginModal(false)
+    return ok
+  }, [login])
+
   if (verifying) {
     return <BgDecoration />
-  }
-
-  if (!isLoggedIn) {
-    return (
-      <>
-        <BgDecoration />
-        <LoginPage onLogin={login} avatar={config?.avatar} name={config?.greeting?.name} />
-      </>
-    )
   }
 
   if (!config) {
@@ -242,14 +246,20 @@ export default function App() {
   return (
     <>
       <BgDecoration />
-      <MenuBar items={config.menuBar.items} icon={config.favicon} onLogout={logout} />
+      <MenuBar
+        items={config.menuBar.items}
+        icon={config.favicon}
+        isLoggedIn={isLoggedIn}
+        onLogout={logout}
+        onLoginClick={() => setShowLoginModal(true)}
+      />
 
       <main
         style={{ position: 'relative', zIndex: 1, padding: '80px 40px 140px', maxWidth: 1400, margin: '0 auto' }}
-        onMouseDown={handleMainMouseDown}
-        onMouseUp={handleMainMouseUp}
-        onMouseLeave={handleMainMouseUp}
-        onClick={handleMainClick}
+        onMouseDown={isLoggedIn ? handleMainMouseDown : undefined}
+        onMouseUp={isLoggedIn ? handleMainMouseUp : undefined}
+        onMouseLeave={isLoggedIn ? handleMainMouseUp : undefined}
+        onClick={isLoggedIn ? handleMainClick : undefined}
       >
         <Welcome
           greeting={greeting}
@@ -269,11 +279,11 @@ export default function App() {
             iconSize={config.settings?.iconSize}
             nameFontSize={config.settings?.nameFontSize}
             categoryFontSize={config.settings?.categoryFontSize}
-            jiggle={jiggleMode}
-            onCardContextMenu={handleCardContext}
-            onReorderCard={handleReorderCard}
-            onRenameCategory={handleRenameCategory}
-            onDeleteCard={handleDeleteCard}
+            jiggle={isLoggedIn ? jiggleMode : false}
+            onCardContextMenu={isLoggedIn ? handleCardContext : undefined}
+            onReorderCard={isLoggedIn ? handleReorderCard : undefined}
+            onRenameCategory={isLoggedIn ? handleRenameCategory : undefined}
+            onDeleteCard={isLoggedIn ? handleDeleteCard : undefined}
           />
         ))}
       </main>
@@ -282,29 +292,37 @@ export default function App() {
         items={config.dock.items}
         utilities={config.dock.utilities}
         linkTarget={linkTarget}
-        jiggle={jiggleMode}
-        onSettingsClick={() => setSettingsOpen(true)}
-        onDropLink={handleDropLink}
-        onItemContextMenu={handleDockContext}
-        onReorderDock={handleReorderDock}
-        onDeleteDockItem={handleDeleteDockItem}
+        jiggle={isLoggedIn ? jiggleMode : false}
+        onSettingsClick={isLoggedIn ? () => setSettingsOpen(true) : undefined}
+        onDropLink={isLoggedIn ? handleDropLink : undefined}
+        onItemContextMenu={isLoggedIn ? handleDockContext : undefined}
+        onReorderDock={isLoggedIn ? handleReorderDock : undefined}
+        onDeleteDockItem={isLoggedIn ? handleDeleteDockItem : undefined}
       />
 
-      <SettingsPanel
-        open={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        iconStyle={iconStyle}
-        linkTarget={linkTarget}
-        setIconStyle={setIconStyle}
-        setLinkTarget={setLinkTarget}
-        config={config}
-        updateConfig={updateConfig}
-        resetConfig={resetConfig}
-        exportYaml={exportYaml}
-        importYaml={importYaml}
-      />
+      {isLoggedIn && (
+        <SettingsPanel
+          open={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+          iconStyle={iconStyle}
+          linkTarget={linkTarget}
+          setIconStyle={setIconStyle}
+          setLinkTarget={setLinkTarget}
+          config={config}
+          updateConfig={updateConfig}
+          resetConfig={resetConfig}
+          exportYaml={exportYaml}
+          importYaml={importYaml}
+        />
+      )}
 
-      {ctx && <ContextMenu x={ctx.x} y={ctx.y} items={ctx.items} onClose={closeCtx} />}
+      {isLoggedIn && ctx && <ContextMenu x={ctx.x} y={ctx.y} items={ctx.items} onClose={closeCtx} />}
+
+      {showLoginModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9998, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+          <LoginPage onLogin={handleLoginFromModal} avatar={config.avatar} name={config.greeting?.name} onClose={() => setShowLoginModal(false)} />
+        </div>
+      )}
     </>
   )
 }

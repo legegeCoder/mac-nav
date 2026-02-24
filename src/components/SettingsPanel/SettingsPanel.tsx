@@ -333,6 +333,10 @@ export default function SettingsPanel({
           <input className={s.formInput} placeholder="https://..." value={link.url} onChange={(e) => update({ url: e.target.value })} />
           <span className={s.formLabel}>描述</span>
           <input className={s.formInput} placeholder="简短描述（可选）" value={link.desc} onChange={(e) => update({ desc: e.target.value })} />
+          <label className={s.checkboxRow}>
+            <input type="checkbox" checked={!!link.public} onChange={() => update({ public: !link.public })} />
+            <span>公开（访客可见）</span>
+          </label>
         </div>
       )
     } else if (editing.type === 'dock') {
@@ -389,6 +393,10 @@ export default function SettingsPanel({
           <input className={s.formInput} placeholder="Dock 项名称" value={item.name} onChange={(e) => update({ name: e.target.value })} autoFocus />
           <span className={s.formLabel}>网址</span>
           <input className={s.formInput} placeholder="https://..." value={item.url || ''} onChange={(e) => update({ url: e.target.value })} />
+          <label className={s.checkboxRow}>
+            <input type="checkbox" checked={!!item.public} onChange={() => update({ public: !item.public })} />
+            <span>公开（访客可见）</span>
+          </label>
         </div>
       )
     } else if (editing.type === 'greeting') {
@@ -645,6 +653,10 @@ export default function SettingsPanel({
                       <div className={s.catHeader}>
                         <span className={s.catTitle}>{cat.title}</span>
                         <div className={s.catActions}>
+                          <label className={s.publicToggle} title={cat.public ? '公开：访客可见' : '私密：仅登录可见'}>
+                            <input type="checkbox" checked={!!cat.public} onChange={() => updateConfig((prev) => ({ ...prev, categories: prev.categories.map((c, i) => i !== catIdx ? c : { ...c, public: !c.public }) }))} />
+                            <span className={s.toggleTrack}><span className={s.toggleTextOn}>公开</span><span className={s.toggleTextOff}>私密</span><span className={s.toggleThumb} /></span>
+                          </label>
                           <button className={s.smallBtn} onClick={() => setEditing({ type: 'renameCategory', idx: catIdx, title: cat.title })}>改名</button>
                           <button className={s.smallBtn} onClick={() => setEditing({ type: 'link', catIdx, linkIdx: -1, link: { ...emptyLink } })}>+ 链接</button>
                           <button className={`${s.smallBtn} ${s.dangerBtn}`} onClick={() => deleteCategory(catIdx)}>删除</button>
@@ -657,6 +669,10 @@ export default function SettingsPanel({
                           </span>
                           <span className={s.linkName}>{link.name}</span>
                           <div className={s.linkActions}>
+                            <label className={s.publicToggleMini} title={link.public ? '公开：访客可见' : '私密：仅登录可见'}>
+                              <input type="checkbox" checked={!!link.public} onChange={() => updateConfig((prev) => ({ ...prev, categories: prev.categories.map((c, ci) => ci !== catIdx ? c : { ...c, links: c.links.map((l, li) => li !== linkIdx ? l : { ...l, public: !l.public }) }) }))} />
+                              <span className={s.toggleTrack}><span className={s.toggleTextOn}>公开</span><span className={s.toggleTextOff}>私密</span><span className={s.toggleThumb} /></span>
+                            </label>
                             <button className={s.tinyBtn} onClick={() => setEditing({ type: 'link', catIdx, linkIdx, link: { ...link } })}>编辑</button>
                             <button className={`${s.tinyBtn} ${s.dangerBtn}`} onClick={() => deleteLink(catIdx, linkIdx)}>删除</button>
                           </div>
@@ -683,6 +699,10 @@ export default function SettingsPanel({
                       </span>
                       <span className={s.linkName}>{item.name}</span>
                       <div className={s.linkActions}>
+                        <label className={s.publicToggleMini} title={item.public ? '公开：访客可见' : '私密：仅登录可见'}>
+                          <input type="checkbox" checked={!!item.public} onChange={() => updateConfig((prev) => ({ ...prev, dock: { ...prev.dock, items: prev.dock.items.map((d, i) => i !== idx ? d : { ...d, public: !d.public }) } }))} />
+                          <span className={s.toggleTrack}><span className={s.toggleTextOn}>公开</span><span className={s.toggleTextOff}>私密</span><span className={s.toggleThumb} /></span>
+                        </label>
                         <button className={s.tinyBtn} onClick={() => setEditing({ type: 'dock', section: 'items', idx, item: { ...item } })}>编辑</button>
                         <button className={`${s.tinyBtn} ${s.dangerBtn}`} onClick={() => deleteDock('items', idx)}>删除</button>
                       </div>

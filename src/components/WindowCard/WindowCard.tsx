@@ -111,12 +111,12 @@ export default function WindowCard({ link, catIdx, linkIdx, iconStyle, linkTarge
       rel={linkTarget === 'new' ? 'noopener noreferrer' : undefined}
       className={cls}
       style={{ ...launchpadVars, ...(jiggle ? jiggleVars : {}), animationDelay: jiggle ? jiggleVars.animationDelay : `${0.1 + index * 0.1}s`, '--icon-size': iconSize ? `${iconSize}px` : undefined, '--name-fs': nameFontSize ? `${nameFontSize}px` : undefined } as React.CSSProperties}
-      draggable
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
-      onDrop={onDrop}
+      draggable={!!onReorder}
+      onDragStart={onReorder ? onDragStart : undefined}
+      onDragEnd={onReorder ? onDragEnd : undefined}
+      onDragOver={onReorder ? onDragOver : undefined}
+      onDragLeave={onReorder ? onDragLeave : undefined}
+      onDrop={onReorder ? onDrop : undefined}
       onContextMenu={handleContextMenu}
       onClick={handleClick}
     >

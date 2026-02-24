@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from 'react'
+import {useCallback, useState} from 'react'
 import yaml from 'js-yaml'
 import {clearAuthToken, getAuthToken} from './useAuth'
 import type {NavConfig} from '../types/nav'
@@ -13,6 +13,18 @@ async function fetchRemoteConfig(): Promise<NavConfig | null> {
       clearAuthToken()
       return null
     }
+    if (!res.ok) return null
+    const data = await res.json()
+    if (data?.categories && data?.dock) return data as NavConfig
+    return null
+  } catch {
+    return null
+  }
+}
+
+async function fetchPublicConfig(): Promise<NavConfig | null> {
+  try {
+    const res = await fetch('/api/config/public')
     if (!res.ok) return null
     const data = await res.json()
     if (data?.categories && data?.dock) return data as NavConfig
@@ -42,14 +54,7 @@ async function saveRemoteConfig(config: NavConfig): Promise<void> {
 export function useNavConfig() {
   const [config, setConfig] = useState<NavConfig | null>(null)
 
-  useEffect(() => {
-    let cancelled = false
-    fetchRemoteConfig().then((remote) => {
-      if (cancelled || !remote) return
-      setConfig(remote)
-    })
-    return () => { cancelled = true }
-  }, [])
+  // No auto-fetch on mount — App.tsx drives fetch based on login state
 
   const updateConfig = useCallback((updater: (prev: NavConfig) => NavConfig) => {
     setConfig((prev) => {
@@ -102,5 +107,11 @@ export function useNavConfig() {
     })
   }, [])
 
-  return { config, updateConfig, resetConfig, exportYaml, importYaml, refetch }
+  const fetchGuest = useCallback(() => {
+    fetchPublicConfig().then((remote) => {
+      if (remote) setConfig(remote)
+    })
+  }, [])
+
+  return { config, updateConfig, resetConfig, exportYaml, importYaml, refetch, fetchGuest }
 }

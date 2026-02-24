@@ -5,11 +5,13 @@ export interface NavLink {
   iconText?: string
   desc: string
   color?: [string, string]
+  public?: boolean
 }
 
 export interface Category {
   title: string
   links: NavLink[]
+  public?: boolean
 }
 
 export interface DockItem {
@@ -19,6 +21,7 @@ export interface DockItem {
   icon?: string
   iconText?: string
   action?: 'settings'
+  public?: boolean
 }
 
 export interface NavConfig {

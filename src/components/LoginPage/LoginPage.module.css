@@ -12,6 +12,30 @@
   flex-direction: column;
   align-items: center;
   animation: fadeIn 0.8s ease-out;
+  position: relative;
+}
+
+.closeBtn {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.closeBtn:hover {
+  background: rgba(255, 255, 255, 0.35);
 }
 
 /* macOS-style round avatar */

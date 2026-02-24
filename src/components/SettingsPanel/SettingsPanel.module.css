@@ -547,3 +547,82 @@
   box-shadow: 0 1px 4px rgba(0,0,0,0.15);
   cursor: pointer;
 }
+
+/* macOS-style toggle switch with inline text */
+.publicToggle, .publicToggleMini {
+  display: inline-flex; align-items: center; cursor: pointer; flex-shrink: 0;
+}
+.publicToggle input, .publicToggleMini input {
+  position: absolute; opacity: 0; width: 0; height: 0;
+}
+.toggleTrack {
+  position: relative; display: inline-flex; align-items: center;
+  width: 48px; height: 22px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 11px;
+  transition: background 0.25s;
+  user-select: none;
+}
+.publicToggleMini .toggleTrack {
+  width: 44px; height: 20px;
+  border-radius: 10px;
+}
+.toggleThumb {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 18px; height: 18px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  transition: transform 0.25s;
+  z-index: 1;
+}
+.publicToggleMini .toggleThumb {
+  width: 16px; height: 16px;
+}
+.toggleTextOff, .toggleTextOn {
+  position: absolute;
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+.toggleTextOff {
+  right: 6px;
+  color: rgba(0,0,0,0.4);
+  opacity: 1;
+}
+.toggleTextOn {
+  left: 6px;
+  color: rgba(255,255,255,0.9);
+  opacity: 0;
+}
+.publicToggle input:checked + .toggleTrack,
+.publicToggleMini input:checked + .toggleTrack {
+  background: #34c759;
+}
+.publicToggle input:checked + .toggleTrack .toggleThumb {
+  transform: translateX(26px);
+}
+.publicToggleMini input:checked + .toggleTrack .toggleThumb {
+  transform: translateX(24px);
+}
+.publicToggle input:checked + .toggleTrack .toggleTextOff,
+.publicToggleMini input:checked + .toggleTrack .toggleTextOff {
+  opacity: 0;
+}
+.publicToggle input:checked + .toggleTrack .toggleTextOn,
+.publicToggleMini input:checked + .toggleTrack .toggleTextOn {
+  opacity: 1;
+}
+
+/* Checkbox row in edit modal */
+.checkboxRow {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--text-primary);
+  cursor: pointer; padding: 2px 0;
+}
+.checkboxRow input[type="checkbox"] {
+  width: 16px; height: 16px; accent-color: #34c759;
+  cursor: pointer;
+}

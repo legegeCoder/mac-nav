@@ -1,14 +1,16 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
-import { useClock } from '../../hooks/useClock'
+import {useCallback, useEffect, useRef, useState} from 'react'
+import {useClock} from '../../hooks/useClock'
 import s from './MenuBar.module.css'
 
 interface Props {
   items: string[]
   icon?: string
+  isLoggedIn: boolean
   onLogout: () => void
+  onLoginClick: () => void
 }
 
-export default function MenuBar({ items, icon, onLogout }: Props) {
+export default function MenuBar({ items, icon, isLoggedIn, onLogout, onLoginClick }: Props) {
   const { dateTime } = useClock()
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -35,10 +37,17 @@ export default function MenuBar({ items, icon, onLogout }: Props) {
           </span>
           {menuOpen && (
             <div className={s.dropdown}>
-              <button className={s.dropItem} onClick={() => { setMenuOpen(false); onLogout() }}>
-                <span className={s.dropIcon}>🚪</span>
-                退出登录
-              </button>
+              {isLoggedIn ? (
+                <button className={s.dropItem} onClick={() => { setMenuOpen(false); onLogout() }}>
+                  <span className={s.dropIcon}>🚪</span>
+                  退出登录
+                </button>
+              ) : (
+                <button className={s.dropItem} onClick={() => { setMenuOpen(false); onLoginClick() }}>
+                  <span className={s.dropIcon}>🔑</span>
+                  登录
+                </button>
+              )}
             </div>
           )}
         </div>

@@ -7,8 +7,8 @@ interface Props {
   utilities: DockItem[]
   linkTarget: 'new' | 'self'
   jiggle?: boolean
-  onSettingsClick: () => void
-  onDropLink: (link: NavLink) => void
+  onSettingsClick?: () => void
+  onDropLink?: (link: NavLink) => void
   onItemContextMenu?: (e: React.MouseEvent, item: DockItem, idx: number) => void
   onReorderDock?: (fromIdx: number, toIdx: number) => void
   onDeleteDockItem?: (idx: number) => void
@@ -42,7 +42,7 @@ export default function Dock({ items, utilities, linkTarget, jiggle, onSettingsC
     if (jiggle) { e.preventDefault(); return }
     if (item.action === 'settings') {
       e.preventDefault()
-      onSettingsClick()
+      onSettingsClick?.()
     }
   }
 
@@ -64,7 +64,7 @@ export default function Dock({ items, utilities, linkTarget, jiggle, onSettingsC
     if (!raw) return
     try {
       const link = JSON.parse(raw) as NavLink
-      onDropLink(link)
+      onDropLink?.(link)
     } catch { /* ignore */ }
   }
 
@@ -107,6 +107,8 @@ export default function Dock({ items, utilities, linkTarget, jiggle, onSettingsC
     e.stopPropagation()
     onItemContextMenu?.(e, item, idx)
   }
+
+  if (items.length === 0 && utilities.length === 0) return null
 
   return (
     <div className={s.container}>

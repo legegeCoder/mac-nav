@@ -5,9 +5,10 @@ interface Props {
   onLogin: (password: string) => Promise<boolean>
   avatar?: string
   name?: string
+  onClose?: () => void
 }
 
-export default function LoginPage({ onLogin, avatar: avatarProp, name: nameProp }: Props) {
+export default function LoginPage({ onLogin, avatar: avatarProp, name: nameProp, onClose }: Props) {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -37,13 +38,25 @@ export default function LoginPage({ onLogin, avatar: avatarProp, name: nameProp 
     }
   }
 
+  useEffect(() => {
+    if (!onClose) return
+    const handler = (e: globalThis.KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
+
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') handleSubmit()
   }
 
+  const handleWrapClick = (e: React.MouseEvent) => {
+    if (onClose && e.target === e.currentTarget) onClose()
+  }
+
   return (
-    <div className={s.wrap}>
+    <div className={s.wrap} onClick={handleWrapClick}>
       <div className={s.content}>
+        {onClose && <button className={s.closeBtn} onClick={onClose} aria-label="关闭">&times;</button>}
         {/* macOS-style avatar circle */}
         <div className={s.avatar}>
           {avatar ? (

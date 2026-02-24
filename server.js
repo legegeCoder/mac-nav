@@ -59,6 +59,47 @@ app.get('/api/login-profile', (_req, res) => {
   }
 })
 
+// Public endpoint: return only public categories, links, and dock items
+app.get('/api/config/public', (_req, res) => {
+  try {
+    const raw = readFileSync(CONFIG_PATH, 'utf-8')
+    const cfg = yaml.load(raw)
+    if (!cfg) return res.status(500).json({ error: 'Config not found' })
+
+    // Filter categories: only public categories with public links
+    const categories = (cfg.categories || [])
+      .filter((cat) => cat.public === true)
+      .map((cat) => {
+        const links = (cat.links || [])
+          .filter((link) => link.public === true)
+          .map(({ public: _p, ...rest }) => rest)
+        const { public: _p, ...catRest } = cat
+        return { ...catRest, links }
+      })
+
+    // Filter dock items: only public, exclude settings action
+    const dockItems = (cfg.dock?.items || [])
+      .filter((item) => item.public === true && item.action !== 'settings')
+      .map(({ public: _p, ...rest }) => rest)
+
+    const dockUtilities = (cfg.dock?.utilities || [])
+      .filter((item) => item.public === true && item.action !== 'settings')
+      .map(({ public: _p, ...rest }) => rest)
+
+    res.json({
+      greeting: cfg.greeting,
+      menuBar: cfg.menuBar,
+      settings: cfg.settings,
+      favicon: cfg.favicon,
+      avatar: cfg.avatar,
+      categories,
+      dock: { items: dockItems, utilities: dockUtilities },
+    })
+  } catch {
+    res.status(500).json({ error: 'Config not found' })
+  }
+})
+
 app.get('/api/verify', requireAuth, (_req, res) => {
   res.json({ ok: true })
 })
