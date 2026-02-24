@@ -6,6 +6,14 @@
   z-index: 0;
 }
 
+.bgImage {
+  position: absolute;
+  inset: -20px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 .orb {
   position: absolute;
   border-radius: 50%;

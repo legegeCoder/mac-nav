@@ -619,6 +619,28 @@ export default function SettingsPanel({
                     </div>
                   </div>
                 </div>
+                <div className={s.section}>
+                  <div className={s.label}>背景图片</div>
+                  <div className={s.bgPreviewRow}>
+                    {config.settings?.bgImage ? (
+                      <div className={s.bgPreviewBox} style={{ backgroundImage: `url(${config.settings.bgImage})` }} />
+                    ) : (
+                      <div className={`${s.bgPreviewBox} ${s.bgPreviewEmpty}`}>默认渐变</div>
+                    )}
+                    <div className={s.bgPreviewActions}>
+                      <input className={s.formInput} placeholder="背景图片地址 https://..." value={config.settings?.bgImage || ''} onChange={(e) => updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, bgImage: e.target.value || undefined } }))} />
+                      {config.settings?.bgImage && (
+                        <button className={`${s.tinyBtn} ${s.dangerBtn}`} onClick={() => updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, bgImage: undefined, bgBlur: undefined } }))}>清除</button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                {config.settings?.bgImage && (
+                  <div className={s.section}>
+                    <div className={s.label}>背景模糊（{config.settings?.bgBlur || 0}px）</div>
+                    <input type="range" className={s.rangeInput} min={0} max={30} value={config.settings?.bgBlur || 0} onChange={(e) => updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, bgBlur: Number(e.target.value) } }))} />
+                  </div>
+                )}
               </>
             )}
 
