@@ -1,12 +1,13 @@
-import { useState, type KeyboardEvent } from 'react'
+import {type KeyboardEvent, useState} from 'react'
 import s from './LoginPage.module.css'
 
 interface Props {
   onLogin: (password: string) => Promise<boolean>
   avatar?: string
+  name?: string
 }
 
-export default function LoginPage({ onLogin, avatar }: Props) {
+export default function LoginPage({ onLogin, avatar, name }: Props) {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -44,7 +45,7 @@ export default function LoginPage({ onLogin, avatar }: Props) {
           )}
         </div>
 
-        <h1 className={s.name}>Nav</h1>
+        <h1 className={s.name}>{name || 'Nav'}</h1>
 
         <div className={`${s.inputWrap} ${shake ? s.shake : ''}`}>
           <input

@@ -230,7 +230,7 @@ export default function App() {
     return (
       <>
         <BgDecoration />
-        <LoginPage onLogin={login} avatar={config?.avatar} />
+        <LoginPage onLogin={login} avatar={config?.avatar} name={config?.greeting?.name} />
       </>
     )
   }
