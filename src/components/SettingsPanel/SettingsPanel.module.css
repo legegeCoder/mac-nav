@@ -223,9 +223,78 @@
 .catHeader {
   display: flex; justify-content: space-between; align-items: center;
   padding: 10px 14px; background: rgba(0,0,0,0.02);
+  gap: 10px;
 }
-.catTitle { font-size: 14px; font-weight: 600; color: var(--text-primary); }
-.catActions { display: flex; gap: 6px; }
+.catLeft {
+  display: flex; align-items: center; gap: 8px;
+  min-width: 0;
+}
+.catTitle {
+  font-size: 14px; font-weight: 600; color: var(--text-primary);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.catRight {
+  display: flex; align-items: center; gap: 8px;
+  flex-shrink: 0;
+}
+.catActions { display: flex; gap: 6px; align-items: center; }
+
+/* Category move buttons (macOS stepper style) */
+.catMoveGroup {
+  display: flex; flex-direction: column;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 5px; overflow: hidden;
+  flex-shrink: 0;
+}
+.catMoveBtn {
+  display: flex; align-items: center; justify-content: center;
+  width: 20px; height: 13px;
+  border: none; padding: 0;
+  background: rgba(255,255,255,0.85);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.catMoveBtn:hover:not(:disabled) {
+  background: var(--accent-blue);
+  color: white;
+}
+.catMoveBtn:disabled {
+  opacity: 0.2; cursor: default;
+}
+.catMoveBtn + .catMoveBtn {
+  border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+/* Category segmented button group (macOS style) */
+.catBtnGroup {
+  display: flex;
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.catSegBtn {
+  padding: 3px 10px;
+  border: none;
+  border-right: 1px solid rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.85);
+  font-size: 11px; font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.catSegBtn:last-child { border-right: none; }
+.catSegBtn:hover {
+  background: rgba(0,122,255,0.08);
+  color: var(--accent-blue);
+}
+.catSegBtnDanger:hover {
+  background: rgba(255,59,48,0.08);
+  color: #ff3b30;
+}
 
 /* Link item */
 .linkItem {

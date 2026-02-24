@@ -651,15 +651,27 @@ export default function SettingsPanel({
                   {config.categories.map((cat, catIdx) => (
                     <div key={catIdx} className={s.catBlock}>
                       <div className={s.catHeader}>
-                        <span className={s.catTitle}>{cat.title}</span>
-                        <div className={s.catActions}>
+                        <div className={s.catLeft}>
+                          <div className={s.catMoveGroup}>
+                            <button className={s.catMoveBtn} disabled={catIdx === 0} onClick={() => updateConfig((prev) => { const cats = [...prev.categories]; [cats[catIdx - 1], cats[catIdx]] = [cats[catIdx], cats[catIdx - 1]]; return { ...prev, categories: cats } })} title="上移">
+                              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 2L1.5 7h7z" fill="currentColor"/></svg>
+                            </button>
+                            <button className={s.catMoveBtn} disabled={catIdx === config.categories.length - 1} onClick={() => updateConfig((prev) => { const cats = [...prev.categories]; [cats[catIdx], cats[catIdx + 1]] = [cats[catIdx + 1], cats[catIdx]]; return { ...prev, categories: cats } })} title="下移">
+                              <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 8L1.5 3h7z" fill="currentColor"/></svg>
+                            </button>
+                          </div>
+                          <span className={s.catTitle}>{cat.title}</span>
+                        </div>
+                        <div className={s.catRight}>
                           <label className={s.publicToggle} title={cat.public ? '公开：访客可见' : '私密：仅登录可见'}>
                             <input type="checkbox" checked={!!cat.public} onChange={() => updateConfig((prev) => ({ ...prev, categories: prev.categories.map((c, i) => i !== catIdx ? c : { ...c, public: !c.public }) }))} />
                             <span className={s.toggleTrack}><span className={s.toggleTextOn}>公开</span><span className={s.toggleTextOff}>私密</span><span className={s.toggleThumb} /></span>
                           </label>
-                          <button className={s.smallBtn} onClick={() => setEditing({ type: 'renameCategory', idx: catIdx, title: cat.title })}>改名</button>
-                          <button className={s.smallBtn} onClick={() => setEditing({ type: 'link', catIdx, linkIdx: -1, link: { ...emptyLink } })}>+ 链接</button>
-                          <button className={`${s.smallBtn} ${s.dangerBtn}`} onClick={() => deleteCategory(catIdx)}>删除</button>
+                          <div className={s.catBtnGroup}>
+                            <button className={s.catSegBtn} onClick={() => setEditing({ type: 'renameCategory', idx: catIdx, title: cat.title })}>改名</button>
+                            <button className={s.catSegBtn} onClick={() => setEditing({ type: 'link', catIdx, linkIdx: -1, link: { ...emptyLink } })}>+ 链接</button>
+                            <button className={`${s.catSegBtn} ${s.catSegBtnDanger}`} onClick={() => deleteCategory(catIdx)}>删除</button>
+                          </div>
                         </div>
                       </div>
                       {cat.links.map((link, linkIdx) => (
