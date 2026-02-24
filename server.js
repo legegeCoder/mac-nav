@@ -1,6 +1,6 @@
 import express from 'express'
-import { readFileSync, writeFileSync, existsSync, copyFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import {copyFileSync, existsSync, readFileSync, writeFileSync} from 'node:fs'
+import {resolve} from 'node:path'
 import yaml from 'js-yaml'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
@@ -47,6 +47,17 @@ function requireAuth(req, res, next) {
     return res.status(401).json({ error: 'Token expired or invalid' })
   }
 }
+
+// Public endpoint: return only avatar & name for the login page
+app.get('/api/login-profile', (_req, res) => {
+  try {
+    const raw = readFileSync(CONFIG_PATH, 'utf-8')
+    const cfg = yaml.load(raw)
+    res.json({ avatar: cfg?.avatar || null, name: cfg?.greeting?.name || null })
+  } catch {
+    res.json({ avatar: null, name: null })
+  }
+})
 
 app.get('/api/verify', requireAuth, (_req, res) => {
   res.json({ ok: true })

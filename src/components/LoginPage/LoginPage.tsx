@@ -1,4 +1,4 @@
-import {type KeyboardEvent, useState} from 'react'
+import {type KeyboardEvent, useEffect, useState} from 'react'
 import s from './LoginPage.module.css'
 
 interface Props {
@@ -7,11 +7,22 @@ interface Props {
   name?: string
 }
 
-export default function LoginPage({ onLogin, avatar, name }: Props) {
+export default function LoginPage({ onLogin, avatar: avatarProp, name: nameProp }: Props) {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(false)
   const [shake, setShake] = useState(false)
+  const [profile, setProfile] = useState<{ avatar?: string; name?: string }>({})
+
+  useEffect(() => {
+    fetch('/api/login-profile')
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => { if (data) setProfile(data) })
+      .catch(() => {})
+  }, [])
+
+  const avatar = avatarProp || profile.avatar
+  const name = nameProp || profile.name
 
   const handleSubmit = async () => {
     if (!password || loading) return
