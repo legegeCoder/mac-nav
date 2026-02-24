@@ -630,7 +630,7 @@ export default function SettingsPanel({
                     <div className={s.bgPreviewActions}>
                       <input className={s.formInput} placeholder="背景图片地址 https://..." value={config.settings?.bgImage || ''} onChange={(e) => updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, bgImage: e.target.value || undefined } }))} />
                       {config.settings?.bgImage && (
-                        <button className={`${s.tinyBtn} ${s.dangerBtn}`} onClick={() => updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, bgImage: undefined, bgBlur: undefined } }))}>清除</button>
+                        <button className={`${s.tinyBtn} ${s.dangerBtn}`} onClick={() => updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, bgImage: undefined, bgBlur: undefined, bgOverlay: undefined } }))}>清除</button>
                       )}
                     </div>
                   </div>
@@ -639,6 +639,12 @@ export default function SettingsPanel({
                   <div className={s.section}>
                     <div className={s.label}>背景模糊（{config.settings?.bgBlur || 0}px）</div>
                     <input type="range" className={s.rangeInput} min={0} max={30} value={config.settings?.bgBlur || 0} onChange={(e) => updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, bgBlur: Number(e.target.value) } }))} />
+                  </div>
+                )}
+                {config.settings?.bgImage && (
+                  <div className={s.section}>
+                    <div className={s.label}>背景遮罩（{config.settings?.bgOverlay || 0}%）</div>
+                    <input type="range" className={s.rangeInput} min={0} max={80} value={config.settings?.bgOverlay || 0} onChange={(e) => updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, bgOverlay: Number(e.target.value) } }))} />
                   </div>
                 )}
               </>

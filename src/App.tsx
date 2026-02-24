@@ -245,7 +245,7 @@ export default function App() {
 
   return (
     <>
-      <BgDecoration bgImage={config.settings?.bgImage} bgBlur={config.settings?.bgBlur} />
+      <BgDecoration bgImage={config.settings?.bgImage} bgBlur={config.settings?.bgBlur} bgOverlay={config.settings?.bgOverlay} />
       <MenuBar
         items={config.menuBar.items}
         icon={config.favicon}
