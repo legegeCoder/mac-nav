@@ -11,6 +11,7 @@ interface Props {
   linkTarget: 'new' | 'self'
   iconSize?: number
   nameFontSize?: number
+  categoryFontSize?: number
   jiggle?: boolean
   onCardContextMenu?: (e: React.MouseEvent, link: NavLink) => void
   onReorderCard?: (fromCat: number, fromIdx: number, toCat: number, toIdx: number) => void
@@ -18,7 +19,7 @@ interface Props {
   onDeleteCard?: (catIdx: number, linkIdx: number) => void
 }
 
-export default function CategorySection({ category, catIdx, iconStyle, linkTarget, iconSize, nameFontSize, jiggle, onCardContextMenu, onReorderCard, onRenameCategory, onDeleteCard }: Props) {
+export default function CategorySection({ category, catIdx, iconStyle, linkTarget, iconSize, nameFontSize, categoryFontSize, jiggle, onCardContextMenu, onReorderCard, onRenameCategory, onDeleteCard }: Props) {
   const [editing, setEditing] = useState(false)
   const [editTitle, setEditTitle] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
@@ -83,7 +84,7 @@ export default function CategorySection({ category, catIdx, iconStyle, linkTarge
 
   return (
     <section>
-      <h2 className={`${s.title} ${s.titleLaunchpad}`} onClick={startEditing} style={onRenameCategory ? { cursor: 'pointer' } : undefined}>
+      <h2 className={`${s.title} ${s.titleLaunchpad}`} onClick={startEditing} style={{ ...(onRenameCategory ? { cursor: 'pointer' } : {}), ...(categoryFontSize ? { fontSize: categoryFontSize + 'px' } : {}) }}>
         {editing ? (
           <input
             ref={inputRef}

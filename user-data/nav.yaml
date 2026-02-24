@@ -18,6 +18,10 @@ settings:
   nameFontSize: 17
   showSearch: false
   cardStyle: launchpad
+  categoryFontSize: 20
+  showSubtitle: false
+  showGreeting: false
+  iconStyle: default
 categories:
   - title: ✨ 常用工具
     links:

@@ -1,6 +1,6 @@
 services:
   nav:
-    image: legege1997/nav:latest
+    image: legege1997/nav-app:latest
     container_name: nav
     ports:
       - "8090:80"

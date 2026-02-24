@@ -23,9 +23,14 @@ interface CtxState {
 }
 
 export default function App() {
-  const { config, updateConfig, resetConfig, exportYaml, importYaml } = useNavConfig()
+  const { config, updateConfig, resetConfig, exportYaml, importYaml, refetch } = useNavConfig()
   const { greeting } = useClock()
   const { isLoggedIn, verifying, login, logout } = useAuth()
+
+  // Fetch config after login status changes to logged-in
+  useEffect(() => {
+    if (isLoggedIn && !config) refetch()
+  }, [isLoggedIn, config, refetch])
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [ctx, setCtx] = useState<CtxState | null>(null)
   const [jiggleMode, setJiggleMode] = useState(false)
@@ -217,7 +222,7 @@ export default function App() {
     }))
   }, [updateConfig])
 
-  if (verifying || !config) {
+  if (verifying) {
     return <BgDecoration />
   }
 
@@ -225,9 +230,13 @@ export default function App() {
     return (
       <>
         <BgDecoration />
-        <LoginPage onLogin={login} avatar={config.avatar} />
+        <LoginPage onLogin={login} avatar={config?.avatar} />
       </>
     )
+  }
+
+  if (!config) {
+    return <BgDecoration />
   }
 
   return (
@@ -246,6 +255,8 @@ export default function App() {
           greeting={greeting}
           name={config.greeting.name}
           subtitle={config.greeting.subtitle}
+          showGreeting={config.settings?.showGreeting !== false}
+          showSubtitle={config.settings?.showSubtitle !== false}
         />
         {config.settings?.showSearch !== false && <SearchBar isLaunchpad />}
         {config.categories.map((cat, catIdx) => (
@@ -257,6 +268,7 @@ export default function App() {
             linkTarget={linkTarget}
             iconSize={config.settings?.iconSize}
             nameFontSize={config.settings?.nameFontSize}
+            categoryFontSize={config.settings?.categoryFontSize}
             jiggle={jiggleMode}
             onCardContextMenu={handleCardContext}
             onReorderCard={handleReorderCard}

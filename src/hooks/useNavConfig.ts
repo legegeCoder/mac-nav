@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
+import {useCallback, useEffect, useState} from 'react'
 import yaml from 'js-yaml'
-import { getAuthToken, clearAuthToken } from './useAuth'
-import type { NavConfig } from '../types/nav'
+import {clearAuthToken, getAuthToken} from './useAuth'
+import type {NavConfig} from '../types/nav'
 
 async function fetchRemoteConfig(): Promise<NavConfig | null> {
   try {
@@ -11,7 +11,6 @@ async function fetchRemoteConfig(): Promise<NavConfig | null> {
     })
     if (res.status === 401) {
       clearAuthToken()
-      window.location.reload()
       return null
     }
     if (!res.ok) return null
@@ -36,7 +35,6 @@ async function saveRemoteConfig(config: NavConfig): Promise<void> {
     })
     if (res.status === 401) {
       clearAuthToken()
-      window.location.reload()
     }
   } catch { /* ignore save errors */ }
 }
@@ -98,5 +96,11 @@ export function useNavConfig() {
     reader.readAsText(file)
   }, [])
 
-  return { config, updateConfig, resetConfig, exportYaml, importYaml }
+  const refetch = useCallback(() => {
+    fetchRemoteConfig().then((remote) => {
+      if (remote) setConfig(remote)
+    })
+  }, [])
+
+  return { config, updateConfig, resetConfig, exportYaml, importYaml, refetch }
 }

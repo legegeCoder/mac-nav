@@ -561,12 +561,42 @@ export default function SettingsPanel({
                   </div>
                 </div>
                 <div className={s.section}>
+                  <div className={s.label}>分类字号（{config.settings?.categoryFontSize || 22}px）</div>
+                  <input type="range" className={s.rangeInput} min={12} max={40} value={config.settings?.categoryFontSize || 22} onChange={(e) => updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, categoryFontSize: Number(e.target.value) } }))} />
+                </div>
+                <div className={s.section}>
                   <div className={s.label}>图标大小（{config.settings?.iconSize || 56}px）</div>
                   <input type="range" className={s.rangeInput} min={24} max={120} value={config.settings?.iconSize || 56} onChange={(e) => updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, iconSize: Number(e.target.value) } }))} />
                 </div>
                 <div className={s.section}>
                   <div className={s.label}>名称字号（{config.settings?.nameFontSize || 17}px）</div>
                   <input type="range" className={s.rangeInput} min={10} max={32} value={config.settings?.nameFontSize || 17} onChange={(e) => updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, nameFontSize: Number(e.target.value) } }))} />
+                </div>
+                <div className={s.section}>
+                  <div className={s.label}>称呼</div>
+                  <div className={`${s.options} ${s.options2}`}>
+                    <div className={`${s.option} ${config.settings?.showGreeting !== false ? s.optionActive : ''}`} onClick={() => updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, showGreeting: true } }))}>
+                      <div className={s.optionPreview}>👋</div>
+                      <div className={s.optionName}>显示</div>
+                    </div>
+                    <div className={`${s.option} ${config.settings?.showGreeting === false ? s.optionActive : ''}`} onClick={() => updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, showGreeting: false } }))}>
+                      <div className={s.optionPreview}>🚫</div>
+                      <div className={s.optionName}>隐藏</div>
+                    </div>
+                  </div>
+                </div>
+                <div className={s.section}>
+                  <div className={s.label}>副标题</div>
+                  <div className={`${s.options} ${s.options2}`}>
+                    <div className={`${s.option} ${config.settings?.showSubtitle !== false ? s.optionActive : ''}`} onClick={() => updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, showSubtitle: true } }))}>
+                      <div className={s.optionPreview}>💬</div>
+                      <div className={s.optionName}>显示</div>
+                    </div>
+                    <div className={`${s.option} ${config.settings?.showSubtitle === false ? s.optionActive : ''}`} onClick={() => updateConfig((prev) => ({ ...prev, settings: { ...prev.settings, showSubtitle: false } }))}>
+                      <div className={s.optionPreview}>🚫</div>
+                      <div className={s.optionName}>隐藏</div>
+                    </div>
+                  </div>
                 </div>
                 <div className={s.section}>
                   <div className={s.label}>搜索框</div>
