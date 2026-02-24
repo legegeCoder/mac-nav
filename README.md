@@ -1,73 +1,70 @@
-# React + TypeScript + Vite
+# Nav App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+一个 macOS 风格的个人导航页，灵感来自 macOS Launchpad。适合自部署，作为浏览器起始页使用。
 
-Currently, two official plugins are available:
+## 特性
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- macOS Launchpad 风格图标网格，支持分类管理
+- macOS 风格 Dock 栏，悬停放大效果
+- macOS 风格顶部菜单栏，实时时钟
+- macOS 锁屏风格登录页，JWT 鉴权
+- 拖拽排序 — 卡片可在分类间拖动，也可拖入 Dock
+- 长按抖动删除 — 类似 iOS/macOS 的长按编辑模式
+- 右键菜单 — 编辑、删除、添加到 Dock
+- 仿系统偏好设置面板 — 头像、外观、图标大小、链接行为等全部可配
+- YAML 配置导入/导出/重置
+- 响应式布局，渐变动画背景
 
-## React Compiler
+## 快速开始
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Docker Compose（推荐）
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```yaml
+# docker-compose.yml
+services:
+  nav:
+    image: legege1997/nav-app:latest
+    container_name: nav
+    ports:
+      - "8090:80"
+    volumes:
+      - ./user-data:/app/user-data
+    environment:
+      - NAV_PASSWORD=admin
+    restart: unless-stopped
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+docker-compose up -d
 ```
+
+访问 `http://localhost:8090`，默认密码 `admin`。
+
+配置数据持久化在 `./user-data/nav.yaml`，可直接编辑或通过设置面板修改。
+
+### Docker
+
+```bash
+docker run -d \
+  --name nav \
+  -p 8090:80 \
+  -v ./user-data:/app/user-data \
+  -e NAV_PASSWORD=admin \
+  --restart unless-stopped \
+  legege1997/nav-app:latest
+```
+
+### 本地开发
+
+```bash
+npm install
+npm run dev
+```
+
+## 技术栈
+
+React + TypeScript + Vite + Express
+
+## License
+
+[Apache License 2.0](LICENSE)
