@@ -1,28 +1,16 @@
 import express from 'express'
-import {copyFileSync, existsSync, readFileSync, writeFileSync} from 'node:fs'
 import {resolve} from 'node:path'
-import yaml from 'js-yaml'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
+import {createConfigStore} from './server-config-store.js'
 
 const app = express()
 const port = process.env.PORT || 80
 
-const CONFIG_PATH = process.env.CONFIG_PATH || resolve('./user-data/nav.yaml')
-const SEED_CONFIG_PATH = resolve('./dist/nav.yaml')
 const NAV_PASSWORD = process.env.NAV_PASSWORD || 'admin'
 const JWT_SECRET = process.env.NAV_JWT_SECRET || ('nav-app-secret-' + NAV_PASSWORD)
 const PASSWORD_HASH = bcrypt.hashSync(NAV_PASSWORD, 10)
-
-// Seed user-data/nav.yaml from dist/nav.yaml if missing
-if (!existsSync(CONFIG_PATH)) {
-  try {
-    copyFileSync(SEED_CONFIG_PATH, CONFIG_PATH)
-    console.log(`Seeded ${CONFIG_PATH} from ${SEED_CONFIG_PATH}`)
-  } catch {
-    console.warn(`Seed config not found at ${SEED_CONFIG_PATH}, skipping`)
-  }
-}
+const configStore = await createConfigStore()
 
 app.use(express.json())
 
@@ -51,8 +39,7 @@ function requireAuth(req, res, next) {
 // Public endpoint: return only avatar & name for the login page
 app.get('/api/login-profile', (_req, res) => {
   try {
-    const raw = readFileSync(CONFIG_PATH, 'utf-8')
-    const cfg = yaml.load(raw)
+    const cfg = configStore.getConfig()
     res.json({ avatar: cfg?.avatar || null, name: cfg?.greeting?.name || null })
   } catch {
     res.json({ avatar: null, name: null })
@@ -62,8 +49,7 @@ app.get('/api/login-profile', (_req, res) => {
 // Public endpoint: return only public categories, links, and dock items
 app.get('/api/config/public', (_req, res) => {
   try {
-    const raw = readFileSync(CONFIG_PATH, 'utf-8')
-    const cfg = yaml.load(raw)
+    const cfg = configStore.getConfig()
     if (!cfg) return res.status(500).json({ error: 'Config not found' })
 
     // Filter categories: only public categories with public links
@@ -106,8 +92,7 @@ app.get('/api/verify', requireAuth, (_req, res) => {
 
 app.get('/api/config', requireAuth, (_req, res) => {
   try {
-    const raw = readFileSync(CONFIG_PATH, 'utf-8')
-    res.json(yaml.load(raw))
+    res.json(configStore.getConfig())
   } catch {
     res.status(500).json({ error: 'Config not found' })
   }
@@ -115,8 +100,7 @@ app.get('/api/config', requireAuth, (_req, res) => {
 
 app.put('/api/config', requireAuth, (req, res) => {
   try {
-    const text = yaml.dump(req.body, { lineWidth: -1, noRefs: true })
-    writeFileSync(CONFIG_PATH, text, 'utf-8')
+    configStore.saveConfig(req.body)
     res.json({ ok: true })
   } catch {
     res.status(500).json({ error: 'Failed to save config' })

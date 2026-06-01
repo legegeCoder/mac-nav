@@ -13,7 +13,7 @@
 - 长按抖动删除 — 类似 iOS/macOS 的长按编辑模式
 - 右键菜单 — 编辑、删除、添加到 Dock
 - 仿系统偏好设置面板 — 头像、外观、图标大小、链接行为等全部可配
-- YAML 配置导入/导出/重置
+- SQLite 默认存储，支持 YAML 配置导入/导出/重置
 - 响应式布局，渐变动画背景
 
 ## 快速开始
@@ -41,7 +41,7 @@ docker-compose up -d
 
 访问 `http://localhost:8090`，默认密码 `admin`。
 
-配置数据持久化在 `./user-data/nav.yaml`，可直接编辑或通过设置面板修改。
+配置数据默认持久化在 `./user-data/nav.sqlite`，可通过 `SQLITE_PATH` 指定 SQLite 文件位置。首次启动时如果存在旧的 `./user-data/nav.yaml`，会自动导入到 SQLite；也可以通过 `CONFIG_PATH=./user-data/nav.yaml` 显式继续使用 YAML 存储。设置面板仍支持 YAML 导入/导出。
 
 ### Docker
 
